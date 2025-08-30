@@ -7,7 +7,7 @@ import { ROUTES } from "./routes";
 
 import GetStartedScreen from "../Screens/GetStartedScreen/GetStarted";
 import LoginScreen from "../Screens/LoginScreen/Login";
-import HomeScreen from "../Screens/HomeScreen/Home";
+import BottomTabNavigator from "./BottomTabNavigator";
 
 export type RootStackParamList = {
     [ROUTES.GET_STARTED]: undefined;
@@ -23,7 +23,7 @@ const AppNavigator = () => {
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name={ROUTES.GET_STARTED} component={GetStartedScreen} />
                 <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
-                <Stack.Screen name={ROUTES.HOME} component={HomeScreen} />
+                <Stack.Screen name={ROUTES.HOME} component={BottomTabNavigator} />
             </Stack.Navigator>
         </NavigationContainer>
     );
