@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     },
     description: {
         fontSize: 14,
-        color: COLORS.grey,
+        color: COLORS.gray,
         textAlign: "center",
         marginBottom: 40,
         lineHeight: 20,
