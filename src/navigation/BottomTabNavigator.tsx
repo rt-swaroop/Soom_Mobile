@@ -77,16 +77,11 @@ const BottomTabNavigator = () => {
 
             <Tab.Screen name="Profile" component={ProfileScreen}
                 options={{
-                    headerTitle: () => (
-                        <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: '700' }}> Profile</Text>
-                    ),
-                    headerRight: () => (
-                        <TouchableOpacity style={{ marginRight: 15 }}>
-                            <Icon name="notifications-none" size={28} color={COLORS.white} />
-                        </TouchableOpacity>
-                    ),
+                    headerShown: false,
+                    tabBarIcon: ({ color, size }) => <Icon name="person" size={size} color={color} />,
                 }}
             />
+
         </Tab.Navigator>
     );
 };
