@@ -1,14 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+
+import { Text, View } from 'react-native'
+
+import { styles } from './Home.styles'
+import MarkAttendance from './components/MarkAttendance'
 
 const Home = () => {
     return (
-        <View>
-            <Text>Home</Text>
+        <View style={styles.container}>
+            <MarkAttendance />
         </View>
     )
 }
 
 export default Home
-
-const styles = StyleSheet.create({})
