@@ -1,19 +1,25 @@
 import React from "react";
+import { useSelector } from "react-redux";
 
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LinearGradient from "react-native-linear-gradient";
 
+import { COLORS } from "../theme/colors";
+import { selectUser } from '../redux/selector'
+
+import { IMAGES } from '../assets/images/index'
 import HomeScreen from "../Screens/HomeScreen/Home";
 import AttendanceScreen from "../Screens/AttendanceScreen/Attendance";
 import ProfileScreen from "../Screens/ProfileScreen/Profile";
 
-import { COLORS } from "../theme/colors";
-
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
+
+    const user = useSelector(selectUser);
+
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -45,11 +51,11 @@ const BottomTabNavigator = () => {
                     headerTitle: () => (
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image
-                                source={{ uri: 'https://i.pravatar.cc/300' }}
+                                source={user?.profilePic?.location ? { uri: user?.profilePic?.location } : IMAGES.user}
                                 style={{ width: 40, height: 40, borderRadius: 20, marginRight: 10 }}
                             />
                             <View>
-                                <Text style={{ color: COLORS.white, fontSize: 16, fontWeight: '700' }}>Tipparthi Sai Swaroop</Text>
+                                <Text style={{ color: COLORS.white, fontSize: 16, fontWeight: '700' }}>{user?.fullName}</Text>
                                 <Text style={{ color: COLORS.white, fontSize: 12 }}>Online</Text>
                             </View>
                         </View>
