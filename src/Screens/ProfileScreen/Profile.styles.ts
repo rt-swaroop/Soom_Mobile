@@ -76,4 +76,39 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "700"
     },
+    modalContainer: {
+        backgroundColor: COLORS.white,
+        padding: 20,
+        borderRadius: 12,
+        alignItems: "center",
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+        color: COLORS.primaryDark,
+    },
+    modalMessage: {
+        fontSize: 14,
+        color: COLORS.black,
+        marginBottom: 20,
+        textAlign: "center",
+    },
+    buttonRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+    },
+    modalButton: {
+        flex: 1,
+        paddingVertical: 10,
+        marginHorizontal: 5,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    buttonText: {
+        color: COLORS.white,
+        fontWeight: "bold",
+    },
+
 });
