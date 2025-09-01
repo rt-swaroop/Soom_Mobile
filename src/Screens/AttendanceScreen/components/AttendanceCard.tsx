@@ -18,9 +18,13 @@ interface AttendanceCardProps {
 }
 
 const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
-    const isOnTime = item.arrival === "On Time";
-    const arrivalColor = isOnTime ? COLORS.green1 : COLORS.red1;
-    const placeIcon = item.place === "Work From Office" ? "office-building" : "home";
+
+    const isEarlyOrOnTime =
+        item.arrival.includes("Early") || item.arrival === "On time";
+
+    const arrivalColor = isEarlyOrOnTime ? COLORS.green1 : COLORS.red1;
+
+    const placeIcon = item.place === "Office Clock-in" ? "office-building" : "home";
 
     const isEmpty = item.clockIn === "--";
 

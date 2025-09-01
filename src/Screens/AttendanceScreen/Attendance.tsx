@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useSelector } from "react-redux";
 
-import { View, FlatList, Text, TouchableOpacity } from "react-native";
+import { View, FlatList, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { showMessage } from "react-native-flash-message";
 
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -9,77 +11,89 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { styles } from "./Attendance.styles";
 import AttendanceCard from "./components/AttendanceCard";
 
-dayjs.extend(isoWeek);
+import { selectUser } from "../../redux/selector";
+import { getAttendance } from "../../services/attendanceServices";
 
-const attendanceData = [
-    {
-        id: "1",
-        date: "2025-08-30",
-        clockIn: "09:00 AM",
-        clockOut: "06:00 PM",
-        location: "Hyderabad",
-        place: "Work From Office",
-        grossHours: "8h 0m",
-        arrival: "On Time",
-    },
-    {
-        id: "2",
-        date: "2025-08-29",
-        clockIn: "09:15 AM",
-        clockOut: "06:05 PM",
-        location: "Hyderabad",
-        place: "Work From Home",
-        grossHours: "7h 50m",
-        arrival: "Late",
-    },
-    {
-        id: "3",
-        date: "2025-08-28",
-        clockIn: "09:30 AM",
-        clockOut: "06:15 PM",
-        location: "Hyderabad",
-        place: "Work From Home",
-        grossHours: "7h 45m",
-        arrival: "Late",
-    },
-    {
-        id: "4",
-        date: "2025-08-27",
-        clockIn: "09:05 AM",
-        clockOut: "06:00 PM",
-        location: "Hyderabad",
-        place: "Work From Office",
-        grossHours: "8h 10m",
-        arrival: "On Time",
-    },
-];
+dayjs.extend(isoWeek);
 
 const AttendanceScreen = () => {
     const [currentWeek, setCurrentWeek] = useState(dayjs());
+    const [attendanceData, setAttendanceData] = useState<{ attendanceDate: string;[key: string]: any }[]>([]);
+    const [loading, setLoading] = useState(false);
+    const user = useSelector(selectUser);
 
     const weekStart = currentWeek.startOf("week");
     const weekEnd = currentWeek.endOf("week");
 
-    const filteredData = useMemo(() => {
-        return attendanceData.filter((item) => {
-            const itemDate = dayjs(item.date);
-            return itemDate.isAfter(weekStart.subtract(1, "day")) && itemDate.isBefore(weekEnd.add(1, "day"));
-        });
-    }, [currentWeek]);
-
     const weekDays = useMemo(() => {
-        return Array.from({ length: 7 }, (_, i) => {
-            const date = weekStart.add(i, "day");
-            return date;
-        });
+        return Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
     }, [weekStart]);
+
+    const fetchUserAttendance = async () => {
+        setLoading(true);
+
+        try {
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            const response = await getAttendance({
+                userId: user?._id || "",
+                startDate: weekStart.format("YYYY-MM-DD"),
+                endDate: weekEnd.format("YYYY-MM-DD"),
+                timeZone
+            });
+
+            if (response?.success) {
+                setAttendanceData(response?.attendance)
+            } else {
+                showMessage({
+                    message: "No attendance records found",
+                    type: "info",
+                    duration: 3000,
+                });
+            }
+
+        } catch (error) {
+            showMessage({
+                message: "Error fetching  attendance data",
+                description: "Unable to retrieve attendance information. Please try again later.",
+                type: "danger",
+                duration: 3000,
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchUserAttendance();
+    }, [currentWeek]);
 
     const mergedData = weekDays.map((date) => {
         const formattedDate = date.format("YYYY-MM-DD");
-        const existing = attendanceData.find((item) => item.date === formattedDate);
+
+        const existing = attendanceData.find(
+            (item) =>
+                item.clockInTime &&
+                dayjs(item.clockInTime).format("YYYY-MM-DD") === formattedDate
+        );
 
         if (existing) {
-            return existing;
+            return {
+                id: existing._id,
+                date: formattedDate,
+                clockIn: existing.clockInTime
+                    ? dayjs(existing.clockInTime).format("hh:mm A")
+                    : "--",
+                clockOut: existing.clockOutTime
+                    ? dayjs(existing.clockOutTime).format("hh:mm A")
+                    : "--",
+                location: existing.location
+                    ? `${existing.location.latitude}, ${existing.location.longitude}`
+                    : "--",
+                place: existing.place || "--",
+                grossHours: existing.grossHours || "--",
+                arrival: existing.arrival || "--",
+            };
         }
 
         return {
@@ -116,12 +130,18 @@ const AttendanceScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            <FlatList
-                data={mergedData}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <AttendanceCard item={item} />}
-                contentContainerStyle={{ padding: 15 }}
-            />
+            {loading ? (
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                    <ActivityIndicator size="large" color="#4c669f" />
+                </View>
+            ) : (
+                <FlatList
+                    data={mergedData}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => <AttendanceCard item={item} />}
+                    contentContainerStyle={{ padding: 15 }}
+                />
+            )}
 
         </View>
     );
