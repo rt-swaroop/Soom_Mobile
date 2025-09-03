@@ -1,12 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from "react-redux";
 
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import Modal from "react-native-modal";
 import { showMessage } from 'react-native-flash-message';
+import Geolocation from "react-native-geolocation-service";
+import Geocoder from "react-native-geocoding";
+import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
 
 import dayjs from 'dayjs';
 
@@ -15,10 +18,16 @@ import { styles } from '../Home.styles';
 import { selectUser } from "../../../redux/selector";
 import { getAttendance, postAttendance } from '../../../services/attendanceServices'
 
+const GOOGLE_MAPS_APIKEY = "AIzaSyA-hxwx7biBRPetUIyWblqOQosZ3Y7VrKE";
+Geocoder.init(GOOGLE_MAPS_APIKEY);
+
 const MarkAttendance = () => {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
-    const [currentAttendanceStatus, setCurrentAttendanceStatus] = useState<any>('')
+    const [currentAttendanceStatus, setCurrentAttendanceStatus] = useState<any>('');
+    const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [address, setAddress] = useState<string>("Fetching location...");
+
     const [isPlaceModalVisible, setPlaceModalVisible] = useState(false);
     const [isConfirmModalVisible, setConfirmModalVisible] = useState(false);
 
@@ -39,6 +48,71 @@ const MarkAttendance = () => {
             fetchCurrentDayAttendance();
         }, [])
     );
+
+    useEffect(() => {
+        const getLocation = async () => {
+            try {
+                let permission;
+
+                if (Platform.OS === "android") {
+                    permission = PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+                } else {
+                    permission = PERMISSIONS.IOS.LOCATION_WHEN_IN_USE;
+                }
+
+                const result = await check(permission);
+
+                if (result === RESULTS.GRANTED) {
+                    fetchLocation();
+                } else {
+                    const requestResult = await request(permission);
+
+                    if (requestResult === RESULTS.GRANTED) {
+                        fetchLocation();
+                    } else {
+                        showMessage({
+                            message: "Permission Denied",
+                            description: "Please enable location to use attendance properly.",
+                            type: "danger",
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error("Error checking location permission:", err);
+            }
+        };
+
+        const fetchLocation = () => {
+            Geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation({ latitude, longitude });
+
+                    try {
+                        const geoResponse = await Geocoder.from(latitude, longitude);
+
+                        if (geoResponse.results.length > 0) {
+                            const formattedAddress = geoResponse.results[0].formatted_address;
+                            setAddress(formattedAddress);
+                        } else {
+                            setAddress(`Lat: ${latitude}, Lng: ${longitude}`);
+                        }
+                    } catch (error) {
+                        console.error("Error in reverse geocoding:", error);
+                        setAddress(`Lat: ${latitude}, Lng: ${longitude}`);
+                    }
+                },
+                (error) => {
+                    console.error("Error fetching location:", error);
+                    setAddress("Error getting location ❌");
+                    setLocation(null);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+            );
+        };
+
+        getLocation();
+    }, []);
 
     const fetchCurrentDayAttendance = async () => {
         setLoading(true);
@@ -92,7 +166,6 @@ const MarkAttendance = () => {
         try {
             const currentDateTime = new Date().toISOString();
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
             const formattedTime = dayjs(currentDateTime).format("hh:mm A");
 
             const data = {
@@ -100,6 +173,7 @@ const MarkAttendance = () => {
                 place: selectedPlace === "wfh" ? "Work From Home" : "Office",
                 time: currentDateTime,
                 timeZone,
+                location
             };
 
             await postAttendance(data, user?._id);
@@ -132,7 +206,6 @@ const MarkAttendance = () => {
         try {
             const currentDateTime = new Date().toISOString();
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
             const formattedTime = dayjs(currentDateTime).format("hh:mm A");
 
             const data = {
@@ -140,6 +213,7 @@ const MarkAttendance = () => {
                 place: currentAttendanceStatus?.place || "Office",
                 time: currentDateTime,
                 timeZone,
+                location
             };
 
             await postAttendance(data, user?._id);
@@ -208,8 +282,8 @@ const MarkAttendance = () => {
                     </TouchableOpacity>
                 </LinearGradient>
                 <View style={styles.locationItem}>
-                    <Icon name="location-outline" size={20} color="#999" />
-                    <Text style={styles.locationText}>Location: Hyderabad, Telangana, India</Text>
+                    {/* <Icon name="location-outline" size={20} color="#999" /> */}
+                    <Text style={styles.locationText}>Location: {address}</Text>
                 </View>
                 <View style={styles.dashedLine}></View>
                 <View style={styles.summaryContainer}>

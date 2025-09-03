@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { Platform } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
 
 import { ROUTES } from "./routes";
 import { logoutUser, setUser } from "../redux/reducers/authReducer";
@@ -31,15 +33,37 @@ const AppNavigator = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const requestLocationPermission = async () => {
+            try {
+                const permission =
+                    Platform.OS === "ios"
+                        ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
+                        : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION;
+
+                const result = await check(permission);
+
+                if (result === RESULTS.DENIED || result === RESULTS.BLOCKED) {
+                    const reqResult = await request(permission);
+                    console.log("Location permission result:", reqResult);
+                }
+            } catch (err) {
+                console.log("Permission error:", err);
+            }
+        };
+
         const initAuth = async () => {
+            await requestLocationPermission();
+
             if (refreshToken) {
                 try {
                     const res = await refreshApi(refreshToken);
-                    dispatch(setUser({
-                        user: res.user,
-                        accessToken: res.accessToken,
-                        refreshToken,
-                    }));
+                    dispatch(
+                        setUser({
+                            user: res.user,
+                            accessToken: res.accessToken,
+                            refreshToken,
+                        })
+                    );
                 } catch (err) {
                     console.log("Refresh failed at startup:", err);
                     dispatch(logoutUser());

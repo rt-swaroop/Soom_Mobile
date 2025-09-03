@@ -56,12 +56,14 @@ export const styles = StyleSheet.create({
     locationItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20
+        justifyContent: 'center',
+        marginBottom: 20,
     },
     locationText: {
-        marginLeft: 3,
+        marginLeft: 1,
         fontSize: 16,
-        color: COLORS.darkGray
+        color: COLORS.darkGray,
+        textAlign: 'center',
     },
     dashedLine: {
         width: '100%',
