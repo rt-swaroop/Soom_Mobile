@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 
 import { View, FlatList, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { showMessage } from "react-native-flash-message";
+import { useFocusEffect } from "@react-navigation/native";
 
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
@@ -64,9 +65,11 @@ const AttendanceScreen = () => {
         }
     }
 
-    useEffect(() => {
-        fetchUserAttendance();
-    }, [currentWeek]);
+    useFocusEffect(
+        useCallback(() => {
+            fetchUserAttendance();
+        }, [currentWeek])
+    );
 
     const mergedData = weekDays.map((date) => {
         const formattedDate = date.format("YYYY-MM-DD");

@@ -56,6 +56,7 @@ const LoginScreen = () => {
             setLoading(true);
 
             const data = { companyCode, userEmail, password, deviceType: 'mobile' };
+            console.log("data", data)
             const response = await loginUser(data);
 
             console.log("response", response)
