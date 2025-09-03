@@ -18,7 +18,7 @@ import { styles } from '../Home.styles';
 import { selectUser } from "../../../redux/selector";
 import { getAttendance, postAttendance } from '../../../services/attendanceServices'
 
-const GOOGLE_MAPS_APIKEY = "AIzaSyA-hxwx7biBRPetUIyWblqOQosZ3Y7VrKE";
+const GOOGLE_MAPS_APIKEY = "AIzaSyAT2Au6vHqZt3x7pMpvhXl0yYgkz3ekpKo";
 Geocoder.init(GOOGLE_MAPS_APIKEY);
 
 const MarkAttendance = () => {
