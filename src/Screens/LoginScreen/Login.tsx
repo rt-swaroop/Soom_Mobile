@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { useDispatch } from 'react-redux';
 
 import DeviceInfo from "react-native-device-info";
-import { useNavigation } from "@react-navigation/native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, View, Image, ActivityIndicator } from "react-native";
+import { Text, TextInput, TouchableOpacity, View, Image, ActivityIndicator } from "react-native";
 import FlashMessage, { showMessage } from "react-native-flash-message";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 import { styles } from "./Login.styles";
 import { COLORS } from "../../theme/colors";
@@ -19,7 +20,6 @@ import { ROUTES } from "../../navigation/routes";
 import { setUser } from '../../redux/reducers/authReducer'
 
 import { loginUser } from '../../services/authServices'
-import store from "../../redux/store";
 
 const LoginScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -56,10 +56,7 @@ const LoginScreen = () => {
             setLoading(true);
 
             const data = { companyCode, userEmail, password, deviceType: 'mobile' };
-            console.log("data", data)
             const response = await loginUser(data);
-
-            console.log("response", response)
 
             showMessage({
                 message: "Login Successful",
@@ -73,9 +70,12 @@ const LoginScreen = () => {
                 refreshToken: response.data.refreshToken
             }));
 
-            console.log("Redux state after login:", store.getState().auth);
-
-            navigation.navigate(ROUTES.HOME);
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: ROUTES.HOME }],
+                })
+            );
 
         } catch (err: any) {
             console.log('Login error catch block:', err);
@@ -90,79 +90,85 @@ const LoginScreen = () => {
 
     return (
         <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.container}>
-            <View style={styles.logoContainer}>
-                <Image source={IMAGES.appLogo} style={styles.logo} resizeMode="contain" />
-            </View>
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : undefined}
-                style={styles.innerContainer}
+            <KeyboardAwareScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                enableOnAndroid={true}
+                extraScrollHeight={20}
+                keyboardShouldPersistTaps="handled"
             >
-                <Text style={styles.title}>Welcome Back</Text>
-                <Text style={styles.subtitle}>Log in to continue</Text>
 
-                <View style={styles.inputContainer}>
-                    <Icon name="business" size={20} color={COLORS.gray} style={styles.icon} />
-                    <TextInput
-                        placeholder="Company Code"
-                        placeholderTextColor={COLORS.darkGray}
-                        style={styles.input}
-                        value={companyCode}
-                        onChangeText={setCompanyCode}
-                    />
+                <View style={styles.logoContainer}>
+                    <Image source={IMAGES.appLogo} style={styles.logo} resizeMode="contain" />
                 </View>
 
-                <View style={styles.inputContainer}>
-                    <Icon name="email" size={20} color={COLORS.gray} style={styles.icon} />
-                    <TextInput
-                        placeholder="Work Email"
-                        placeholderTextColor={COLORS.darkGray}
-                        style={styles.input}
-                        value={userEmail}
-                        onChangeText={setUserEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                </View>
+                <View style={styles.innerContainer}>
+                    <Text style={styles.title}>Welcome Back</Text>
+                    <Text style={styles.subtitle}>Log in to continue</Text>
 
-                <View style={styles.inputContainer}>
-                    <Icon name="lock" size={20} color={COLORS.gray} style={styles.icon} />
-                    <TextInput
-                        placeholder="Password"
-                        placeholderTextColor={COLORS.darkGray}
-                        style={styles.input}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={!showPassword}
-                    />
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                        <Icon
-                            name={showPassword ? "visibility" : "visibility-off"}
-                            size={20}
-                            color={COLORS.gray}
-                            style={styles.eyeIcon}
+                    <View style={styles.inputContainer}>
+                        <Icon name="business" size={20} color={COLORS.gray} style={styles.icon} />
+                        <TextInput
+                            placeholder="Company Code"
+                            placeholderTextColor={COLORS.darkGray}
+                            style={styles.input}
+                            value={companyCode}
+                            onChangeText={setCompanyCode}
                         />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Icon name="email" size={20} color={COLORS.gray} style={styles.icon} />
+                        <TextInput
+                            placeholder="Work Email"
+                            placeholderTextColor={COLORS.darkGray}
+                            style={styles.input}
+                            value={userEmail}
+                            onChangeText={setUserEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                        />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Icon name="lock" size={20} color={COLORS.gray} style={styles.icon} />
+                        <TextInput
+                            placeholder="Password"
+                            placeholderTextColor={COLORS.darkGray}
+                            style={styles.input}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                        />
+                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                            <Icon
+                                name={showPassword ? "visibility" : "visibility-off"}
+                                size={20}
+                                color={COLORS.gray}
+                                style={styles.eyeIcon}
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading} >
+                        <LinearGradient
+                            colors={[COLORS.red1, COLORS.red2]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.buttonGradient}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color={COLORS.white} />
+                            ) : (
+                                <Text style={styles.buttonText}>Login</Text>
+                            )}
+                        </LinearGradient>
                     </TouchableOpacity>
+
+                    <Text style={styles.versionText}>Version {appVersion}</Text>
+
                 </View>
-
-                <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading} >
-                    <LinearGradient
-                        colors={[COLORS.red1, COLORS.red2]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 0 }}
-                        style={styles.buttonGradient}
-                    >
-                        {loading ? (
-                            <ActivityIndicator size="small" color={COLORS.white} />
-                        ) : (
-                            <Text style={styles.buttonText}>Login</Text>
-                        )}
-                    </LinearGradient>
-                </TouchableOpacity>
-
-                <Text style={styles.versionText}>Version {appVersion}</Text>
-
-            </KeyboardAvoidingView>
+            </KeyboardAwareScrollView>
             <FlashMessage position="top" />
         </LinearGradient>
     );
