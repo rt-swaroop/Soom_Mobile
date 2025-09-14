@@ -5,6 +5,7 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LinearGradient from "react-native-linear-gradient";
+import { useNavigation, NavigationProp } from "@react-navigation/native";
 
 import { COLORS } from "../theme/colors";
 import { selectUser } from '../redux/selector'
@@ -16,7 +17,14 @@ import ProfileScreen from "../Screens/ProfileScreen/Profile";
 
 const Tab = createBottomTabNavigator();
 
+type RootTabParamList = {
+    Home: undefined;
+    Attendance: undefined;
+    Profile: undefined;
+};
+
 const BottomTabNavigator = () => {
+    const navigation = useNavigation<NavigationProp<RootTabParamList>>();
 
     const user = useSelector(selectUser);
 
@@ -48,18 +56,24 @@ const BottomTabNavigator = () => {
         >
             <Tab.Screen name="Home" component={HomeScreen}
                 options={{
-                    headerTitle: () => (
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image
-                                source={user?.profilePic?.location ? { uri: user?.profilePic?.location } : IMAGES.user}
-                                style={{ width: 40, height: 40, borderRadius: 20, marginRight: 10 }}
-                            />
-                            <View>
-                                <Text style={{ color: COLORS.white, fontSize: 16, fontWeight: '700' }}>{user?.fullName}</Text>
-                                <Text style={{ color: COLORS.white, fontSize: 12 }}>Online</Text>
-                            </View>
-                        </View>
-                    ),
+                    headerTitle: () => {
+                        const navigation = useNavigation<NavigationProp<RootTabParamList>>();
+                        return (
+                            <TouchableOpacity
+                                style={{ flexDirection: 'row', alignItems: 'center' }}
+                                onPress={() => navigation.navigate("Profile")} // ⬅️ navigate to Profile tab
+                            >
+                                <Image
+                                    source={user?.profilePic?.location ? { uri: user?.profilePic?.location } : IMAGES.user}
+                                    style={{ width: 40, height: 40, borderRadius: 20, marginRight: 10 }}
+                                />
+                                <View>
+                                    <Text style={{ color: COLORS.white, fontSize: 16, fontWeight: '700' }}>{user?.fullName}</Text>
+                                    <Text style={{ color: COLORS.white, fontSize: 12 }}>Online</Text>
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    },
                     headerRight: () => (
                         <TouchableOpacity style={{ marginRight: 15 }}>
                             <Icon name="notifications-none" size={28} color={COLORS.white} />

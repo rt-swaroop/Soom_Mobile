@@ -3,10 +3,15 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-// import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
+import Geocoder from 'react-native-geocoding';
 
 import { COLORS } from "../../../theme/colors";
 import { styles } from "../Attendance.styles";
+
+const GOOGLE_MAPS_APIKEY = "AIzaSyAT2Au6vHqZt3x7pMpvhXl0yYgkz3ekpKo";
+Geocoder.init(GOOGLE_MAPS_APIKEY);
 
 interface AttendanceCardProps {
     date: string;
@@ -15,11 +20,12 @@ interface AttendanceCardProps {
     place: string;
     grossHours: string;
     arrival: string;
-    clockOutLocation: { latitude: number; longitude: number } | string;
-    clockInLocation: { latitude: number; longitude: number } | string;
+    clockOutLocation: { latitude: number; longitude: number } | null;
+    clockInLocation: { latitude: number; longitude: number } | null;
 }
 
 const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
+
     const [mapVisible, setMapVisible] = useState(false);
 
     const isEarlyOrOnTime =
@@ -29,10 +35,8 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
     const placeIcon = item.place === "Office Clock-in" ? "office-building" : "home";
     const isEmpty = item.clockIn === "--";
 
-    const clockInLoc =
-        typeof item.clockInLocation === "object" ? item.clockInLocation : null;
-    const clockOutLoc =
-        typeof item.clockOutLocation === "object" ? item.clockOutLocation : null;
+    const clockInLoc = item.clockInLocation;
+    const clockOutLoc = item.clockOutLocation;
 
     return (
         <View style={styles.card}>
@@ -71,7 +75,8 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
                 </TouchableOpacity>
                 <Row icon="timer-outline" label="Gross Hours" value={item.grossHours} />
             </View>
-            {/* <Modal visible={mapVisible} animationType="slide" transparent={true}>
+
+            <Modal visible={mapVisible} animationType="slide" transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Attendance Location</Text>
@@ -79,11 +84,16 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
                         <MapView
                             style={styles.map}
                             initialRegion={{
-                                latitude: clockInLoc?.latitude || 20.5937, // fallback India
+                                latitude: clockInLoc?.latitude || 20.5937,
                                 longitude: clockInLoc?.longitude || 78.9629,
                                 latitudeDelta: 0.01,
                                 longitudeDelta: 0.01,
                             }}
+                            zoomEnabled={true}
+                            zoomControlEnabled={true}
+                            scrollEnabled={true}
+                            showsCompass={true}
+                            showsScale={true}
                         >
                             {clockInLoc && (
                                 <Marker
@@ -99,6 +109,15 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
                                     pinColor="red"
                                 />
                             )}
+                            {clockInLoc && clockOutLoc && (
+                                <MapViewDirections
+                                    origin={clockInLoc}
+                                    destination={clockOutLoc}
+                                    apikey={GOOGLE_MAPS_APIKEY}
+                                    strokeWidth={4}
+                                    strokeColor="blue"
+                                />
+                            )}
                         </MapView>
 
                         <TouchableOpacity
@@ -109,7 +128,7 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </Modal> */}
+            </Modal>
 
         </View>
     );

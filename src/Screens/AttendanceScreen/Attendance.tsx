@@ -81,6 +81,7 @@ const AttendanceScreen = () => {
         );
 
         if (existing) {
+
             return {
                 id: existing._id,
                 date: formattedDate,
@@ -90,12 +91,13 @@ const AttendanceScreen = () => {
                 clockOut: existing.clockOutTime
                     ? dayjs(existing.clockOutTime).format("hh:mm A")
                     : "--",
-                clockInLocation: existing.clockinLocation
-                    ? `${existing.clockinLocation.latitude}, ${existing.clockinLocation.longitude}`
-                    : "--",
-                clockOutLocation: existing.clockoutLocation
-                    ? `${existing.clockoutLocation.latitude}, ${existing.clockoutLocation.longitude}`
-                    : "--",
+                clockInLocation: existing?.clockinLocation
+                    ? { latitude: existing?.clockinLocation?.latitude, longitude: existing?.clockinLocation?.longitude }
+                    : null,
+
+                clockOutLocation: existing?.clockoutLocation
+                    ? { latitude: existing?.clockoutLocation?.latitude, longitude: existing?.clockoutLocation?.longitude }
+                    : null,
 
                 place: existing.place || "--",
                 grossHours: existing.grossHours || "--",
@@ -108,8 +110,8 @@ const AttendanceScreen = () => {
             date: formattedDate,
             clockIn: "--",
             clockOut: "--",
-            clockInLocation: "--",
-            clockOutLocation: "--",
+            clockInLocation: null,
+            clockOutLocation: null,
             place: "--",
             grossHours: "--",
             arrival: "--",
