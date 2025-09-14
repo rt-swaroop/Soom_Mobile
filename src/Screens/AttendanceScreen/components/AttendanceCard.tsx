@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity, Modal } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+// import MapView, { Marker } from "react-native-maps";
 
 import { COLORS } from "../../../theme/colors";
 import { styles } from "../Attendance.styles";
@@ -11,22 +12,27 @@ interface AttendanceCardProps {
     date: string;
     clockIn: string;
     clockOut: string;
-    location: string;
     place: string;
     grossHours: string;
     arrival: string;
+    clockOutLocation: { latitude: number; longitude: number } | string;
+    clockInLocation: { latitude: number; longitude: number } | string;
 }
 
 const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
+    const [mapVisible, setMapVisible] = useState(false);
 
     const isEarlyOrOnTime =
         item.arrival.includes("Early") || item.arrival === "On time";
 
     const arrivalColor = isEarlyOrOnTime ? COLORS.green1 : COLORS.red1;
-
     const placeIcon = item.place === "Office Clock-in" ? "office-building" : "home";
-
     const isEmpty = item.clockIn === "--";
+
+    const clockInLoc =
+        typeof item.clockInLocation === "object" ? item.clockInLocation : null;
+    const clockOutLoc =
+        typeof item.clockOutLocation === "object" ? item.clockOutLocation : null;
 
     return (
         <View style={styles.card}>
@@ -53,10 +59,58 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
                         <Text style={styles.timeLabel}>OUT</Text>
                     </View>
                 </View>
-
-                <Row icon="map-marker-outline" label="Location" value={item.location} />
+                <TouchableOpacity onPress={() => setMapVisible(true)}>
+                    <Row icon="map-marker-outline" label="Location"
+                        value={
+                            clockInLoc || clockOutLoc
+                                ? "View on Map"
+                                : "--"
+                        }
+                        valueStyle={{ color: COLORS.primaryDark }}
+                    />
+                </TouchableOpacity>
                 <Row icon="timer-outline" label="Gross Hours" value={item.grossHours} />
             </View>
+            {/* <Modal visible={mapVisible} animationType="slide" transparent={true}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Attendance Location</Text>
+
+                        <MapView
+                            style={styles.map}
+                            initialRegion={{
+                                latitude: clockInLoc?.latitude || 20.5937, // fallback India
+                                longitude: clockInLoc?.longitude || 78.9629,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                            }}
+                        >
+                            {clockInLoc && (
+                                <Marker
+                                    coordinate={clockInLoc}
+                                    title="Clock-In Location"
+                                    pinColor="green"
+                                />
+                            )}
+                            {clockOutLoc && (
+                                <Marker
+                                    coordinate={clockOutLoc}
+                                    title="Clock-Out Location"
+                                    pinColor="red"
+                                />
+                            )}
+                        </MapView>
+
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setMapVisible(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal> */}
+
         </View>
     );
 };

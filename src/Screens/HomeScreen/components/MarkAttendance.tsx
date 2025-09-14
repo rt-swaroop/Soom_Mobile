@@ -63,12 +63,12 @@ const MarkAttendance = () => {
                 const result = await check(permission);
 
                 if (result === RESULTS.GRANTED) {
-                    fetchLocation();
+                    await fetchLocation();
                 } else {
                     const requestResult = await request(permission);
 
                     if (requestResult === RESULTS.GRANTED) {
-                        fetchLocation();
+                        await fetchLocation();
                     } else {
                         showMessage({
                             message: "Permission Denied",
@@ -78,37 +78,60 @@ const MarkAttendance = () => {
                     }
                 }
             } catch (err) {
-                console.error("Error checking location permission:", err);
+                console.error("Error checking/requesting location permission:", err);
+                setAddress("Error checking permissions ❌");
             }
         };
 
-        const fetchLocation = () => {
-            Geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude } = position.coords;
-                    setLocation({ latitude, longitude });
+        const fetchLocation = async () => {
+            try {
+                Geolocation.getCurrentPosition(
+                    async (position) => {
+                        try {
+                            const latitude = position?.coords?.latitude;
+                            const longitude = position?.coords?.longitude;
 
-                    try {
-                        const geoResponse = await Geocoder.from(latitude, longitude);
+                            setLocation({ latitude, longitude });
 
-                        if (geoResponse.results.length > 0) {
-                            const formattedAddress = geoResponse.results[0].formatted_address;
-                            setAddress(formattedAddress);
-                        } else {
-                            setAddress(`Lat: ${latitude}, Lng: ${longitude}`);
+                            try {
+                                const geoResponse = await Geocoder.from(latitude, longitude);
+
+                                if (geoResponse.results.length > 0) {
+                                    const formattedAddress = geoResponse.results[0].formatted_address;
+                                    setAddress(formattedAddress);
+                                } else {
+                                    setAddress(`Lat: ${latitude}, Lng: ${longitude}`);
+                                }
+                            } catch (geoError) {
+                                console.error("Error in reverse geocoding:", geoError);
+                                setAddress(`Lat: ${latitude}, Lng: ${longitude}`);
+                            }
+                        } catch (innerErr) {
+                            console.error("Error handling location data:", innerErr);
+                            setAddress("Error handling location data ❌");
+                            setLocation(null);
                         }
-                    } catch (error) {
-                        console.error("Error in reverse geocoding:", error);
-                        setAddress(`Lat: ${latitude}, Lng: ${longitude}`);
+                    },
+                    (error) => {
+                        console.error("Error fetching location:", error);
+                        setAddress("Error getting location ❌");
+                        setLocation(null);
+                    },
+                    {
+                        accuracy: {
+                            android: 'high',
+                            ios: 'best',
+                        },
+                        forceRequestLocation: true,
+                        showLocationDialog: true,
+                        forceLocationManager: true,
                     }
-                },
-                (error) => {
-                    console.error("Error fetching location:", error);
-                    setAddress("Error getting location ❌");
-                    setLocation(null);
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-            );
+                );
+            } catch (err) {
+                console.error("Unexpected error in fetchLocation:", err);
+                setAddress("Unexpected error ❌");
+                setLocation(null);
+            }
         };
 
         getLocation();
@@ -282,7 +305,6 @@ const MarkAttendance = () => {
                     </TouchableOpacity>
                 </LinearGradient>
                 <View style={styles.locationItem}>
-                    {/* <Icon name="location-outline" size={20} color="#999" /> */}
                     <Text style={styles.locationText}>Location: {address}</Text>
                 </View>
                 <View style={styles.dashedLine}></View>

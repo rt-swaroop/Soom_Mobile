@@ -32,7 +32,16 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs your location to mark attendance from Office or Work From Home.</string>
+	<string>This app requires your location to mark attendance accurately.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs background location access to track attendance even when running in the background.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app uses your location for attendance tracking.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+    	<key>AttendanceTracking</key>
+    	<string>We use your location temporarily to mark attendance when you clock-in or clock-out.</string>
+	</dict>
 	<key>RCTNewArchEnabled</key>
 	<false/>
 	<key>UILaunchStoryboardName</key>

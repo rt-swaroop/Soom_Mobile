@@ -18,6 +18,10 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
 
+      <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAT2Au6vHqZt3x7pMpvhXl0yYgkz3ekpKo" />
+
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

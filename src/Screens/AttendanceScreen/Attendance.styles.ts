@@ -117,5 +117,38 @@ export const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "600",
         color: COLORS.black,
-    }
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        width: "90%",
+        height: "70%",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        overflow: "hidden",
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        padding: 10,
+        textAlign: "center",
+        color: COLORS.primaryDark,
+    },
+    map: {
+        flex: 1,
+    },
+    closeButton: {
+        padding: 12,
+        backgroundColor: COLORS.primary,
+        alignItems: "center",
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
 });
