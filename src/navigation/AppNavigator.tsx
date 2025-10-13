@@ -14,7 +14,7 @@ import { refreshToken as refreshApi } from "../services/authServices";
 
 import GetStartedScreen from "../Screens/GetStartedScreen/GetStarted";
 import LoginScreen from "../Screens/LoginScreen/Login";
-import BottomTabNavigator from "./BottomTabNavigator";
+import MainNavigator from "./BottomTabNavigator";
 
 export type RootStackParamList = {
     [ROUTES.GET_STARTED]: undefined;
@@ -44,7 +44,6 @@ const AppNavigator = () => {
 
                 if (result === RESULTS.DENIED || result === RESULTS.BLOCKED) {
                     const reqResult = await request(permission);
-                    console.log("Location permission result:", reqResult);
                 }
             } catch (err) {
                 console.log("Permission error:", err);
@@ -87,7 +86,7 @@ const AppNavigator = () => {
             >
                 <Stack.Screen name={ROUTES.GET_STARTED} component={GetStartedScreen} />
                 <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
-                <Stack.Screen name={ROUTES.HOME} component={BottomTabNavigator} />
+                <Stack.Screen name={ROUTES.HOME} component={MainNavigator} />
             </Stack.Navigator>
         </NavigationContainer>
     );

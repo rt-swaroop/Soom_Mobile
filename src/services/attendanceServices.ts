@@ -1,4 +1,4 @@
-import API_ROUTES from './config'
+import API_ROUTES from './constant'
 import api from '../config/api';
 
 interface AttendanceParams {

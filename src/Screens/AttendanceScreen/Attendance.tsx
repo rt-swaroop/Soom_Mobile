@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 
 import { View, FlatList, Text, TouchableOpacity, ActivityIndicator } from "react-native";

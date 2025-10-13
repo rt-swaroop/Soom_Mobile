@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
 import { styles } from './Home.styles'
 import MarkAttendance from './components/MarkAttendance'

@@ -1,4 +1,4 @@
-import API_ROUTES from './config'
+import API_ROUTES from './constant'
 import api from '../config/api';
 
 export const loginUser = async (data: { companyCode: string; userEmail: string; password: string; deviceType: string; }) => {

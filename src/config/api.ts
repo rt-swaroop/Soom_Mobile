@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import store from '../redux/store';
-import API_ROUTES from '../services/config'
+import API_ROUTES from '../services/constant'
 import { logoutUser, setUser, updateAccessToken } from "../redux/reducers/authReducer";
 import { selectAccessToken, selectRefeshToken } from "../redux/selector";
 

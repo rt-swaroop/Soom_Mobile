@@ -32,6 +32,7 @@ const MarkAttendance = () => {
     const [isConfirmModalVisible, setConfirmModalVisible] = useState(false);
 
     const [loading, setLoading] = useState(false);
+    const [locationLoading, setLocationLoading] = useState(true);
 
     const user = useSelector(selectUser);
 
@@ -51,6 +52,7 @@ const MarkAttendance = () => {
 
     useEffect(() => {
         const getLocation = async () => {
+            setLocationLoading(true);
             try {
                 let permission;
 
@@ -75,11 +77,14 @@ const MarkAttendance = () => {
                             description: "Please enable location to use attendance properly.",
                             type: "danger",
                         });
+                        setAddress("Location permission denied");
+                        setLocationLoading(false);
                     }
                 }
             } catch (err) {
                 console.error("Error checking/requesting location permission:", err);
                 setAddress("Error checking permissions ❌");
+                setLocationLoading(false);
             }
         };
 
@@ -110,12 +115,15 @@ const MarkAttendance = () => {
                             console.error("Error handling location data:", innerErr);
                             setAddress("Error handling location data ❌");
                             setLocation(null);
+                        } finally {
+                            setLocationLoading(false);
                         }
                     },
                     (error) => {
                         console.error("Error fetching location:", error);
                         setAddress("Error getting location ❌");
                         setLocation(null);
+                        setLocationLoading(false);
                     },
                     {
                         accuracy: {
@@ -131,6 +139,7 @@ const MarkAttendance = () => {
                 console.error("Unexpected error in fetchLocation:", err);
                 setAddress("Unexpected error ❌");
                 setLocation(null);
+                setLocationLoading(false);
             }
         };
 
@@ -286,17 +295,27 @@ const MarkAttendance = () => {
 
     return (
         <>
-
             <View style={styles.attendanceCard}>
                 <Text style={styles.timeText}>{currentTime}</Text>
                 <Text style={styles.dateText}>{currentDate}</Text>
                 <LinearGradient colors={gradientColors} style={styles.attendanceButtonContainer}>
-                    <TouchableOpacity style={styles.attendanceButton} onPress={handleClockInOut}>
+                    <TouchableOpacity
+                        style={[
+                            styles.attendanceButton,
+                            (loading || locationLoading) && { opacity: 0.6 },
+                        ]}
+                        onPress={handleClockInOut}
+                        disabled={loading || locationLoading}
+                    >
                         {loading ? (
                             <ActivityIndicator size="large" color="#fff" />
                         ) : (
                             <>
-                                <Icon name="hand-right-outline" size={40} color="white" />
+                                {locationLoading ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <Icon name="hand-right-outline" size={40} color="white" />
+                                )}
                                 <Text style={styles.attendanceButtonText}>
                                     {currentAttendanceStatus?.attendanceStatus || 'Clock-in'}
                                 </Text>
@@ -426,7 +445,6 @@ const MarkAttendance = () => {
                     </View>
                 </View>
             </Modal>
-
         </>
     );
 };

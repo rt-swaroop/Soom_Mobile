@@ -21,6 +21,7 @@ import CollapsibleSection from "./components/CollapsibleSection";
 
 const ProfileScreen = () => {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
 
     const user = useSelector(selectUser);
 
@@ -48,7 +49,9 @@ const ProfileScreen = () => {
         <>
             <ScrollView style={styles.container}>
                 <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.header}>
-                    <Image source={user?.profilePic?.location ? { uri: user?.profilePic?.location } : IMAGES.user} style={styles.profilePic} />
+                    <TouchableOpacity onPress={() => setShowImageModal(true)} activeOpacity={0.8}>
+                        <Image source={user?.profilePic?.location ? { uri: user?.profilePic?.location } : IMAGES.user} style={styles.profilePic} />
+                    </TouchableOpacity>
                     <Text style={styles.name}>{user?.fullName}</Text>
                     <Text style={styles.email}>{user?.workEmail}</Text>
                 </LinearGradient>
@@ -161,6 +164,29 @@ const ProfileScreen = () => {
                                 <Text style={styles.buttonText}>Logout</Text>
                             </TouchableOpacity>
                         </View>
+                    </View>
+                </Modal>
+
+                <Modal
+                    isVisible={showImageModal}
+                    onBackdropPress={() => setShowImageModal(false)}
+                    backdropOpacity={0.9}
+                    animationIn="fadeIn"
+                    animationOut="fadeOut"
+                    style={{ margin: 0, justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <View style={{ flex: 1, width: '100%', backgroundColor: '#222', justifyContent: 'center', alignItems: 'center' }}>
+                        <TouchableOpacity
+                            style={{ position: 'absolute', top: 50, right: 20, zIndex: 10 }}
+                            onPress={() => setShowImageModal(false)}
+                        >
+                            <Icon name="close" size={32} color={COLORS.white} />
+                        </TouchableOpacity>
+
+                        <Image
+                            source={user?.profilePic?.location ? { uri: user?.profilePic?.location } : IMAGES.user}
+                            style={{ width: '100%', height: '80%', resizeMode: 'contain' }}
+                        />
                     </View>
                 </Modal>
 
