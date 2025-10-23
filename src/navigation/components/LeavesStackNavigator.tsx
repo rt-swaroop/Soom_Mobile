@@ -3,20 +3,19 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LinearGradient from "react-native-linear-gradient";
 import { Text } from "react-native";
 
-import { ROUTES } from "./routes";
-import { COLORS } from "../theme/colors";
+import { COLORS } from "../../theme/colors";
+import { ROUTES } from "../routes";
 
-import Timeoff from "../Screens/TimeoffScreen/Timeoff";
-import AddEditTimeoff from "../Screens/TimeoffScreen/components/AddEditTimeoff";
-import TimeOffHistory from "../Screens/TimeoffScreen/components/TimeOffHistory";
+import Leaves from "../../Screens/LeavesScreen/Leaves";
+import LeaveHistory from "../../Screens/LeavesScreen/components/LeaveHistory";
+import AddEditLeaves from "../../Screens/LeavesScreen/components/AddEditLeaves";
 
 const Stack = createNativeStackNavigator();
 
-const TimeoffStackNavigator = () => {
-
+const LeavesStackNavigator = () => {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={ROUTES.TIMEOFF} component={Timeoff}
+            <Stack.Screen name={ROUTES.LEAVES} component={Leaves}
                 options={{
                     headerShown: true,
                     headerStyle: { backgroundColor: "transparent" },
@@ -24,12 +23,12 @@ const TimeoffStackNavigator = () => {
                         <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={{ flex: 1 }} />
                     ),
                     headerTitle: () => (
-                        <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: "700" }}>Timeoff</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: "700" }}>Leaves</Text>
                     ),
                     headerTintColor: COLORS.white,
                 }}
             />
-            <Stack.Screen name={ROUTES.TIMEOFFHISTORY} component={TimeOffHistory}
+            <Stack.Screen name={ROUTES.LEAVEHISTORY} component={LeaveHistory}
                 options={{
                     headerShown: true,
                     headerStyle: { backgroundColor: "transparent" },
@@ -37,14 +36,14 @@ const TimeoffStackNavigator = () => {
                         <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={{ flex: 1 }} />
                     ),
                     headerTitle: () => (
-                        <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: "700" }}>TimeOff History</Text>
+                        <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: "700" }}>Leave History</Text>
                     ),
                     headerTintColor: COLORS.white,
                 }}
             />
             <Stack.Screen
-                name={ROUTES.ADDEDITTIMEOFF}
-                component={AddEditTimeoff}
+                name={ROUTES.ADDEDITLEAVES}
+                component={AddEditLeaves}
                 options={({
                     route,
                 }: {
@@ -57,15 +56,14 @@ const TimeoffStackNavigator = () => {
                     ),
                     headerTitle: () => (
                         <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: "700" }}>
-                            {route.params?.mode === 'edit' ? 'Edit TimeOff' : 'Apply TimeOff'}
+                            {route.params?.mode === 'edit' ? 'Edit Leave' : 'Apply Leave'}
                         </Text>
                     ),
                     headerTintColor: COLORS.white,
                 })}
             />
         </Stack.Navigator>
-    )
+    );
+};
 
-}
-
-export default TimeoffStackNavigator;
+export default LeavesStackNavigator;

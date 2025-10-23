@@ -16,9 +16,9 @@ import HomeScreen from "../Screens/HomeScreen/Home";
 import AttendanceScreen from "../Screens/AttendanceScreen/Attendance";
 import ProfileScreen from "../Screens/ProfileScreen/Profile";
 
-import MoreOptionsModal from "./MoreOptionsModal";
-import LeavesStackNavigator from "./LeavesStackNavigator";
-import TimeoffStackNavigator from "./TimeoffStackNavigator";
+import MoreOptionsModal from "./components/MoreOptionsModal";
+import LeavesStackNavigator from "./components/LeavesStackNavigator";
+import TimeoffStackNavigator from "./components/TimeoffStackNavigator";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

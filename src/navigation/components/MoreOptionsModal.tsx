@@ -16,8 +16,8 @@ type MoreOptionsModalProps = {
 };
 
 const servicesData: Service[] = [
-    { id: "1", label: "Leaves", icon: "calendar-outline" },
-    { id: "2", label: "Time-Off", icon: "calendar-outline" },
+    { id: "1", label: "Leaves", icon: "calendar-clear-outline" },
+    { id: "2", label: "Time-Off", icon: "alarm-outline" },
     // { id: "2", label: "Shifts", icon: "alarm-outline" },
     // { id: "3", label: "Report", icon: "stats-chart-outline" },
     // { id: "4", label: "To-do", icon: "checkbox-outline" },
@@ -25,7 +25,7 @@ const servicesData: Service[] = [
     // { id: "6", label: "Tasks", icon: "clipboard-outline" },
     // { id: "7", label: "Payroll", icon: "wallet-outline" },
     // { id: "8", label: "Posts", icon: "newspaper-outline" },
-    // { id: "9", label: "Calendar", icon: "calendar-outline" },
+    // { id: "3", label: "Calendar", icon: "calendar-outline" },
     // { id: "10", label: "Expenses", icon: "cash-outline" },
     // { id: "11", label: "Export Data", icon: "cloud-download-outline" },
     // { id: "12", label: "Support", icon: "headset-outline" },

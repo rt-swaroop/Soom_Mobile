@@ -1,4 +1,3 @@
-// store/store.js
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer from './rootReducer';
 import { persistStore, persistReducer } from 'redux-persist';

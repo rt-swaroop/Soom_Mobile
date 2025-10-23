@@ -60,7 +60,7 @@ const LeaveBalance = ({ onHistoryPress }: Props) => {
                         color: "#2563EB",
                         data: {
                             available: response?.leaveSummary?.casualLeave?.remaining,
-                            used: response?.leaveSummary?.casualLeave?.remaining,
+                            used: response?.leaveSummary?.casualLeave?.used,
                             total: response?.leaveSummary?.casualLeave?.total,
                         },
                     },
