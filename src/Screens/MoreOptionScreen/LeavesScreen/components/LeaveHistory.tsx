@@ -7,12 +7,12 @@ import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation
 import Icon from "react-native-vector-icons/Feather";
 
 import { styles } from '../Leaves.styles';
-import { ROUTES } from '../../../navigation/routes';
-import { COLORS } from '../../../theme/colors';
+import { ROUTES } from '../../../../navigation/routes';
+import { COLORS } from '../../../../theme/colors';
 
-import { selectUser } from "../../../redux/selector";
+import { selectUser } from "../../../../redux/selector";
 
-import { getLeaveHistory } from '../../../services/leavesServices';
+import { getLeaveHistory } from '../../../../services/leavesServices';
 
 const LeaveHistory = () => {
 

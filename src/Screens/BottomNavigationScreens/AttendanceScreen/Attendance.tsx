@@ -12,8 +12,8 @@ import isoWeek from "dayjs/plugin/isoWeek";
 import { styles } from "./Attendance.styles";
 import AttendanceCard from "./components/AttendanceCard";
 
-import { selectUser } from "../../redux/selector";
-import { getAttendance } from "../../services/attendanceServices";
+import { selectUser } from "../../../redux/selector";
+import { getAttendance } from "../../../services/attendanceServices";
 
 dayjs.extend(isoWeek);
 

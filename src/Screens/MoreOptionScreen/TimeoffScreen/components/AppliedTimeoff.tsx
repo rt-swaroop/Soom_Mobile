@@ -7,15 +7,16 @@ import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/Feather";
 
-import { COLORS } from "../../../theme/colors";
-import { ROUTES } from "../../../navigation/routes";
+import { COLORS } from "../../../../theme/colors";
+import { ROUTES } from "../../../../navigation/routes";
 
-import { selectUser } from "../../../redux/selector";
+import { selectUser } from "../../../../redux/selector";
 
-import { getUpcomingAndPendingLeaves } from "../../../services/leavesServices";
+import { getUpcomingAndPendingTimeoff } from "../../../../services/timeoffServices";
 
-const AppliedLeaves = () => {
-    const [leaves, setLeaves] = useState<any[]>([]);
+const AppliedTimeoff = () => {
+
+    const [timeOffs, setTimeOffs] = useState<any[]>([]);
 
     const [loading, setLoading] = useState(false);
 
@@ -23,16 +24,16 @@ const AppliedLeaves = () => {
 
     const navigation = useNavigation<NavigationProp<any>>();
 
-    const fetchUpcomingAndpendingLeaves = async () => {
+    const fetchUpcomingAndpendingTimeoff = async () => {
 
         if (!user?._id) return;
 
         setLoading(true);
         try {
-            const response = await getUpcomingAndPendingLeaves({ userId: user._id, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
-            const leavesData = response?.data || [];
+            const response = await getUpcomingAndPendingTimeoff({ userId: user._id, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+            const timeoffData = response?.data || [];
 
-            setLeaves(leavesData);
+            setTimeOffs(timeoffData);
         } catch (error) {
             console.error("Error fetching leave history:", error);
             showMessage({
@@ -48,11 +49,11 @@ const AppliedLeaves = () => {
 
     useFocusEffect(
         useCallback(() => {
-            fetchUpcomingAndpendingLeaves();
+            fetchUpcomingAndpendingTimeoff();
         }, [user?._id])
     );
 
-    const LeaveCard = ({ item }: { item: any }) => {
+    const TimeoffCard = ({ item }: { item: any }) => {
 
         const statusColor =
             item.status === "Approved"
@@ -61,25 +62,33 @@ const AppliedLeaves = () => {
                     ? COLORS.primary
                     : COLORS.red1;
 
+        let dateLabel = '';
         let formattedFrom = '';
         let formattedTo = '';
 
-        const start = new Date(item.startDate);
-        const end = new Date(item.endDate);
+        if (item.timeOffType === "Half Day") {
+            formattedFrom = item.startTime;
+            formattedTo = item.endTime;
+            dateLabel = "Time";
+        } else if (item.timeOffType === "Work From Home") {
+            const start = new Date(item.startDate);
+            const end = new Date(item.endDate);
 
-        formattedFrom = start.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
+            formattedFrom = start.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+            });
 
-        formattedTo = end.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-        });
+            formattedTo = end.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+            });
 
-        if (formattedFrom === formattedTo) formattedTo = '';
+            if (formattedFrom === formattedTo) formattedTo = '';
+            dateLabel = "Date";
+        }
 
         const appliedDate = item.createdAt
             ? new Date(item.createdAt).toLocaleDateString('en-GB', {
@@ -100,21 +109,22 @@ const AppliedLeaves = () => {
         return (
             <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate(ROUTES.ADDEDITLEAVES, { mode: 'edit', item })}
+                onPress={() => navigation.navigate(ROUTES.ADDEDITTIMEOFF, { mode: 'edit', item })}
             >
                 <View style={styles.cardContainer}>
                     <View style={[styles.statusIndicator, { backgroundColor: statusColor }]} />
 
                     <View style={styles.cardContent}>
+
                         <View style={styles.headerRow}>
-                            <Text style={styles.cardTitle}>{item.leaveType}</Text>
+                            <Text style={styles.cardTitle}>{item.timeOffType}</Text>
                             <View style={[styles.statusBadgeContainer, { backgroundColor: statusColor }]}>
                                 <Text style={styles.statusBadgeText}>{item.status}</Text>
                             </View>
                         </View>
 
                         <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Date:</Text>
+                            <Text style={styles.infoLabel}>{dateLabel}:</Text>
                             <Text style={styles.infoValue}>
                                 {formattedTo ? `From ${formattedFrom} • To ${formattedTo}` : formattedFrom}
                             </Text>
@@ -170,8 +180,10 @@ const AppliedLeaves = () => {
 
                     </View>
                 </View>
+
             </TouchableOpacity>
         )
+
     }
 
     if (loading) {
@@ -186,23 +198,23 @@ const AppliedLeaves = () => {
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>Upcoming / Pending</Text>
             <FlatList
-                data={leaves}
+                data={timeOffs}
                 keyExtractor={(item) => item._id}
-                renderItem={({ item }) => <LeaveCard item={item} />}
+                renderItem={({ item }) => <TimeoffCard item={item} />}
                 ListEmptyComponent={
                     <View style={styles.emptyBox}>
-                        <Text style={styles.emptyText}>No applied leaves</Text>
+                        <Text style={styles.emptyText}>No applied timeoffs</Text>
                     </View>
                 }
                 contentContainerStyle={styles.listContainer}
                 showsVerticalScrollIndicator={false}
-
             />
-        </View>
-    );
-};
 
-export default AppliedLeaves;
+        </View>
+    )
+}
+
+export default AppliedTimeoff
 
 const styles = StyleSheet.create({
     container: {
@@ -213,38 +225,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 12
-    },
-    loader: {
-        flex: 1,
-        backgroundColor: COLORS.lightBlue,
-    },
-    tabBar: {
-        flexDirection: "row",
-        backgroundColor: COLORS.white,
-        borderRadius: 20,
-        padding: 4,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: COLORS.gray2,
-    },
-    tabItem: {
-        flex: 1,
-        paddingVertical: 8,
-        borderRadius: 16,
-        alignItems: "center",
-    },
-    tabItemActive: {
-        backgroundColor: COLORS.primary,
-        borderRadius: 16,
-    },
-    tabLabel: {
-        color: COLORS.primaryDark,
-        fontSize: 14,
-        fontWeight: "500"
-    },
-    tabLabelActive: {
-        color: COLORS.white,
-        fontWeight: "600"
     },
     emptyBox: {
         alignItems: "center",
@@ -353,4 +333,8 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginHorizontal: 4,
     },
-});
+    loader: {
+        flex: 1,
+        backgroundColor: COLORS.lightBlue,
+    },
+})

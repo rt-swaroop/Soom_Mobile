@@ -5,13 +5,13 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import { showMessage } from 'react-native-flash-message';
 import { useNavigation } from '@react-navigation/native';
 
-import { COLORS } from '../../../theme/colors';
-import { selectUser } from '../../../redux/selector';
+import { COLORS } from '../../../../theme/colors';
+import { selectUser } from '../../../../redux/selector';
 
-import DatePickerInput from '../../../Components/DatePickerInput';
-import Dropdown from '../../../Components/Dropdown';
+import DatePickerInput from '../../../../Components/DatePickerInput';
+import Dropdown from '../../../../Components/Dropdown';
 
-import { applyLeave } from '../../../services/leavesServices';
+import { applyLeave } from '../../../../services/leavesServices';
 
 const AddEditLeaves = (props: any) => {
 

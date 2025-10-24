@@ -6,9 +6,9 @@ import { Text } from "react-native";
 import { COLORS } from "../../theme/colors";
 import { ROUTES } from "../routes";
 
-import Leaves from "../../Screens/LeavesScreen/Leaves";
-import LeaveHistory from "../../Screens/LeavesScreen/components/LeaveHistory";
-import AddEditLeaves from "../../Screens/LeavesScreen/components/AddEditLeaves";
+import Leaves from '../../Screens/MoreOptionScreen/LeavesScreen/Leaves'
+import LeaveHistory from "../../Screens/MoreOptionScreen/LeavesScreen/components/LeaveHistory";
+import AddEditLeaves from "../../Screens/MoreOptionScreen/LeavesScreen/components/AddEditLeaves";
 
 const Stack = createNativeStackNavigator();
 

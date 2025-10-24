@@ -12,9 +12,9 @@ import { COLORS } from "../theme/colors";
 import { selectUser } from "../redux/selector";
 import { IMAGES } from "../assets/images";
 
-import HomeScreen from "../Screens/HomeScreen/Home";
-import AttendanceScreen from "../Screens/AttendanceScreen/Attendance";
-import ProfileScreen from "../Screens/ProfileScreen/Profile";
+import HomeScreen from "../Screens/BottomNavigationScreens/HomeScreen/Home"
+import AttendanceScreen from "../Screens/BottomNavigationScreens/AttendanceScreen/Attendance";
+import ProfileScreen from "../Screens/BottomNavigationScreens/ProfileScreen/Profile";
 
 import MoreOptionsModal from "./components/MoreOptionsModal";
 import LeavesStackNavigator from "./components/LeavesStackNavigator";

@@ -9,13 +9,13 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Modal from "react-native-modal";
 
 import { styles } from "./Profile.styles";
-import { COLORS } from "../../theme/colors";
-import { ROUTES } from "../../navigation/routes";
-import { IMAGES } from "../../assets/images/index";
-import { RootStackParamList } from "../../navigation/AppNavigator";
+import { COLORS } from "../../../theme/colors";
+import { ROUTES } from "../../../navigation/routes";
+import { IMAGES } from "../../../assets/images/index";
+import { RootStackParamList } from "../../../navigation/AppNavigator";
 
-import { logoutUser } from '../../redux/reducers/authReducer'
-import { selectUser } from '../../redux/selector'
+import { logoutUser } from '../../../redux/reducers/authReducer'
+import { selectUser } from '../../../redux/selector'
 
 import CollapsibleSection from "./components/CollapsibleSection";
 

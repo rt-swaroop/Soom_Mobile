@@ -18,8 +18,8 @@ type MoreOptionsModalProps = {
 const servicesData: Service[] = [
     { id: "1", label: "Leaves", icon: "calendar-clear-outline" },
     { id: "2", label: "Time-Off", icon: "alarm-outline" },
+    { id: "3", label: "Daily Report", icon: "clipboard-outline" },
     // { id: "2", label: "Shifts", icon: "alarm-outline" },
-    // { id: "3", label: "Report", icon: "stats-chart-outline" },
     // { id: "4", label: "To-do", icon: "checkbox-outline" },
     // { id: "5", label: "Projects", icon: "briefcase-outline" },
     // { id: "6", label: "Tasks", icon: "clipboard-outline" },

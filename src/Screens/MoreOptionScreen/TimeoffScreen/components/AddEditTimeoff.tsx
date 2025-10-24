@@ -5,14 +5,14 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import { showMessage } from 'react-native-flash-message';
 import { useNavigation } from '@react-navigation/native';
 
-import { COLORS } from '../../../theme/colors';
-import { selectUser } from '../../../redux/selector';
+import { COLORS } from '../../../../theme/colors';
+import { selectUser } from '../../../../redux/selector';
 
-import DatePickerInput from '../../../Components/DatePickerInput';
-import TimePickerInput from '../../../Components/TimePickerInput';
-import Dropdown from '../../../Components/Dropdown';
+import DatePickerInput from '../../../../Components/DatePickerInput';
+import TimePickerInput from '../../../../Components/TimePickerInput';
+import Dropdown from '../../../../Components/Dropdown';
 
-import { applyTimeOff } from '../../../services/timeoffServices';
+import { applyTimeOff } from '../../../../services/timeoffServices';
 
 const AddEditTimeoff = (props: any) => {
     const [selectedOption, setSelectedOption] = useState<string>('');

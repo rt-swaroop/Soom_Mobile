@@ -7,7 +7,7 @@ import MapView, { Marker } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import Geocoder from 'react-native-geocoding';
 
-import { COLORS } from "../../../theme/colors";
+import { COLORS } from "../../../../theme/colors";
 import { styles } from "../Attendance.styles";
 
 const GOOGLE_MAPS_APIKEY = "AIzaSyAT2Au6vHqZt3x7pMpvhXl0yYgkz3ekpKo";

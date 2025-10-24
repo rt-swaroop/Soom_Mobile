@@ -4,7 +4,7 @@ import { Text, View, TouchableOpacity } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 
 import { styles } from './Leaves.styles';
-import { ROUTES } from "../../navigation/routes";
+import { ROUTES } from "../../../navigation/routes";
 
 import LeaveBalance from "./components/LeaveBalance";
 import AppliedLeaves from "./components/AppliedLeaves";

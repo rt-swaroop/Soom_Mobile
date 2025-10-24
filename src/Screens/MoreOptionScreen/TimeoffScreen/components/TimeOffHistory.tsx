@@ -7,12 +7,12 @@ import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation
 import Icon from "react-native-vector-icons/Feather";
 
 import { styles } from '../Timeoff.styles';
-import { ROUTES } from '../../../navigation/routes';
-import { COLORS } from '../../../theme/colors';
+import { ROUTES } from '../../../../navigation/routes';
+import { COLORS } from '../../../../theme/colors';
 
-import { selectUser } from "../../../redux/selector";
+import { selectUser } from "../../../../redux/selector";
 
-import { getTimeoffHistory } from '../../../services/timeoffServices';
+import { getTimeoffHistory } from '../../../../services/timeoffServices';
 
 const TimeOffHistory = () => {
     const [timeOffs, setTimeOffs] = useState<any[]>([]);

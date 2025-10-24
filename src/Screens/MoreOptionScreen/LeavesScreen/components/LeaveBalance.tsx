@@ -8,11 +8,11 @@ import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from "@react-navigation/native";
 
 import { styles } from '../Leaves.styles'
-import { COLORS } from "../../../theme/colors";
+import { COLORS } from "../../../../theme/colors";
 
-import { selectUser } from "../../../redux/selector";
+import { selectUser } from "../../../../redux/selector";
 
-import { getLeaveBalance } from "../../../services/leavesServices";
+import { getLeaveBalance } from "../../../../services/leavesServices";
 
 type LeaveType = {
     available: number;

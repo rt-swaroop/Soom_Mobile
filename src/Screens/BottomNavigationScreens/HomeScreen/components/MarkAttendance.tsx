@@ -15,8 +15,8 @@ import dayjs from 'dayjs';
 
 import { styles } from '../Home.styles';
 
-import { selectUser } from "../../../redux/selector";
-import { getAttendance, postAttendance } from '../../../services/attendanceServices'
+import { selectUser } from "../../../../redux/selector";
+import { getAttendance, postAttendance } from '../../../../services/attendanceServices'
 
 const GOOGLE_MAPS_APIKEY = "AIzaSyAT2Au6vHqZt3x7pMpvhXl0yYgkz3ekpKo";
 Geocoder.init(GOOGLE_MAPS_APIKEY);
@@ -276,9 +276,9 @@ const MarkAttendance = () => {
             ? ['#ff0000', '#ff9999']
             : ['#4c669f', '#3b5998', '#192f6a'];
 
-    let clockInTime = "00:00";
-    let clockOutTime = "00:00";
-    let duration = "00:00";
+    let clockInTime = "--:--";
+    let clockOutTime = "--:--";
+    let duration = "--:--";
 
     if (currentAttendanceStatus?.clockInTime) {
 
