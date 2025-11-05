@@ -19,14 +19,16 @@ import ProfileScreen from "../Screens/BottomNavigationScreens/ProfileScreen/Prof
 import MoreOptionsModal from "./components/MoreOptionsModal";
 import LeavesStackNavigator from "./components/LeavesStackNavigator";
 import TimeoffStackNavigator from "./components/TimeoffStackNavigator";
+import DailyReportStackNavigator from "./components/DailyReportStackNavigator";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 type RootStackParamList = {
     BottomTabs: undefined;
-    LeavesStack: undefined
-    TimeoffStack: undefined
+    LeavesStack: undefined;
+    TimeoffStack: undefined;
+    DailyReportStack: undefined;
 };
 
 const BottomTabNavigator = () => {
@@ -44,6 +46,9 @@ const BottomTabNavigator = () => {
                 break;
             case "Time-Off":
                 navigation.navigate("TimeoffStack");
+                break;
+            case "Daily Report":
+                navigation.navigate("DailyReportStack");
                 break;
             default:
                 console.log("Selected:", option);
@@ -156,6 +161,7 @@ const MainNavigator = () => {
             <Stack.Screen name="BottomTabs" component={BottomTabNavigator} />
             <Stack.Screen name="LeavesStack" component={LeavesStackNavigator} />
             <Stack.Screen name="TimeoffStack" component={TimeoffStackNavigator} />
+            <Stack.Screen name="DailyReportStack" component={DailyReportStackNavigator} />
         </Stack.Navigator>
     );
 };

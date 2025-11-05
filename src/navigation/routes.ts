@@ -4,6 +4,7 @@ export const ROUTES = {
 
     HOME: 'Home',
 
+    LEAVESTACK: 'LeavesStack',
     LEAVES: 'Leaves',
     LEAVEHISTORY: 'LeaveHistory',
     ADDEDITLEAVES: 'AddEditLeaves',
@@ -11,6 +12,9 @@ export const ROUTES = {
     TIMEOFF: 'Timeoff',
     TIMEOFFHISTORY: 'TimeoffHistory',
     ADDEDITTIMEOFF: 'AddEditTimeoff',
+
+    DAILYREPORTS: 'DailyReports',
+    SUBMITDAILYREPORT: 'SubmitDailyReport'
 } as const
 
 export type RouteName = typeof ROUTES[keyof typeof ROUTES];
