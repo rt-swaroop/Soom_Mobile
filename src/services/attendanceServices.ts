@@ -3,14 +3,15 @@ import api from '../config/api';
 
 interface AttendanceParams {
     userId: string;
+    subscriberId: string;
     startDate: string;
     endDate: string;
     timeZone: string;
 }
 
-export const getAttendance = async ({ userId, startDate, endDate, timeZone }: AttendanceParams) => {
+export const getAttendance = async ({ userId, subscriberId, startDate, endDate, timeZone }: AttendanceParams) => {
     try {
-        const response = await api.get(`${API_ROUTES.ATTENDANCE}/get-attendance/${userId}`, {
+        const response = await api.get(`${API_ROUTES.ATTENDANCE}/get-attendance/${userId}/${subscriberId}`, {
             params: { startDate, endDate, timeZone },
         });
         return response.data;

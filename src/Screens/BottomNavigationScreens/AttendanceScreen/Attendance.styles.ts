@@ -152,4 +152,21 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
+    holidayContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 20,
+    },
+    holidayTitle: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: COLORS.black,
+        marginBottom: 8,
+        textAlign: "center",
+    },
+    holidayText: {
+        fontSize: 14,
+        color: COLORS.darkGray,
+        fontStyle: "italic",
+    },
 });

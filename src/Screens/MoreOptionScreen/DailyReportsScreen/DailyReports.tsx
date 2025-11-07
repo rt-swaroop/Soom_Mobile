@@ -67,7 +67,6 @@ const DailyReports = () => {
 
             const response = await getDailyReports({ userId: user._id, formattedDate, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
 
-            console.log("Daily Reports Response:", response);
             setDailyReport(response?.data || null)
 
         } catch (error) {

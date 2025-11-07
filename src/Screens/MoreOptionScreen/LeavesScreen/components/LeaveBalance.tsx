@@ -30,13 +30,15 @@ type BalanceCard = {
 
 interface Props {
     onHistoryPress?: () => void;
+    refreshKey?: number;
+    onRefreshComplete?: () => void;
 }
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const LeaveBalance = ({ onHistoryPress }: Props) => {
+const LeaveBalance = ({ onHistoryPress, refreshKey, onRefreshComplete }: Props) => {
     const [balanceCards, setBalanceCards] = useState<BalanceCard[]>([]);
     const [collapsed, setCollapsed] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -110,6 +112,14 @@ const LeaveBalance = ({ onHistoryPress }: Props) => {
             fetchLeaveBalance();
         }, [user?._id])
     );
+
+    React.useEffect(() => {
+        if (typeof refreshKey === 'number' && refreshKey > 0) {
+            fetchLeaveBalance().finally(() => {
+                onRefreshComplete?.();
+            });
+        }
+    }, [refreshKey]);
 
     const toggleCollapse = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

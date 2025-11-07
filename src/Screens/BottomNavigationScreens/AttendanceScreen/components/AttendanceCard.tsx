@@ -22,6 +22,8 @@ interface AttendanceCardProps {
     arrival: string;
     clockOutLocation: { latitude: number; longitude: number } | null;
     clockInLocation: { latitude: number; longitude: number } | null;
+    isHoliday?: boolean;
+    holidayTitle?: string | null;
 }
 
 const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
@@ -29,51 +31,78 @@ const AttendanceCard: React.FC<{ item: AttendanceCardProps }> = ({ item }) => {
     const [mapVisible, setMapVisible] = useState(false);
 
     const isEarlyOrOnTime =
-        item.arrival.includes("Early") || item.arrival === "On time";
+        (item.arrival && (item.arrival.includes("Early") || item.arrival === "On time")) || false;
 
     const arrivalColor = isEarlyOrOnTime ? COLORS.green1 : COLORS.red1;
     const placeIcon = item.place === "Office Clock-in" ? "office-building" : "home";
     const isEmpty = item.clockIn === "--";
+    const isHoliday = item.isHoliday || false;
 
     const clockInLoc = item.clockInLocation;
     const clockOutLoc = item.clockOutLocation;
 
+    const holidayGradientColors = ["#FF6B6B", "#FF8E53"];
+
     return (
         <View style={styles.card}>
-            <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.cardHeader}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <LinearGradient
+                colors={isHoliday ? holidayGradientColors : [COLORS.primary, COLORS.primaryDark]}
+                style={styles.cardHeader}
+            >
+                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
                     <Text style={styles.dateText}>{item.date}</Text>
-                    {!isEmpty && <Icon name={placeIcon} size={22} color={COLORS.white} style={{ marginLeft: 8 }} />}
+                    {isHoliday && (
+                        <Icon name="calendar-star" size={22} color={COLORS.white} style={{ marginLeft: 8 }} />
+                    )}
+                    {!isEmpty && !isHoliday && (
+                        <Icon name={placeIcon} size={22} color={COLORS.white} style={{ marginLeft: 8 }} />
+                    )}
                 </View>
 
-                <View style={[styles.arrivalBadge, { backgroundColor: arrivalColor }]}>
-                    <Text style={styles.arrivalText}>{item.arrival}</Text>
-                </View>
+                {isHoliday ? (
+                    <View style={[styles.arrivalBadge, { backgroundColor: "rgba(255, 255, 255, 0.3)" }]}>
+                        <Text style={styles.arrivalText}>Public Holiday</Text>
+                    </View>
+                ) : (
+                    <View style={[styles.arrivalBadge, { backgroundColor: arrivalColor }]}>
+                        <Text style={styles.arrivalText}>{item.arrival}</Text>
+                    </View>
+                )}
             </LinearGradient>
 
             <View style={styles.cardBody}>
-                <View style={styles.timeRow}>
-                    <View style={styles.timeBox}>
-                        <Text style={styles.time}>{item.clockIn}</Text>
-                        <Text style={styles.timeLabel}>IN</Text>
+                {isHoliday ? (
+                    <View style={styles.holidayContainer}>
+                        <Icon name="party-popper" size={48} color="#FF6B6B" style={{ marginBottom: 12 }} />
+                        <Text style={styles.holidayTitle}>{item.holidayTitle || "Public Holiday"}</Text>
+                        <Text style={styles.holidayText}>No attendance required</Text>
                     </View>
-                    <View style={styles.divider} />
-                    <View style={styles.timeBox}>
-                        <Text style={styles.time}>{item.clockOut}</Text>
-                        <Text style={styles.timeLabel}>OUT</Text>
-                    </View>
-                </View>
-                <TouchableOpacity onPress={() => setMapVisible(true)}>
-                    <Row icon="map-marker-outline" label="Location"
-                        value={
-                            clockInLoc || clockOutLoc
-                                ? "View on Map"
-                                : "--"
-                        }
-                        valueStyle={{ color: COLORS.primaryDark }}
-                    />
-                </TouchableOpacity>
-                <Row icon="timer-outline" label="Gross Hours" value={item.grossHours} />
+                ) : (
+                    <>
+                        <View style={styles.timeRow}>
+                            <View style={styles.timeBox}>
+                                <Text style={styles.time}>{item.clockIn}</Text>
+                                <Text style={styles.timeLabel}>IN</Text>
+                            </View>
+                            <View style={styles.divider} />
+                            <View style={styles.timeBox}>
+                                <Text style={styles.time}>{item.clockOut}</Text>
+                                <Text style={styles.timeLabel}>OUT</Text>
+                            </View>
+                        </View>
+                        {(clockInLoc || clockOutLoc) && (
+                            <TouchableOpacity onPress={() => setMapVisible(true)}>
+                                <Row icon="map-marker-outline" label="Location"
+                                    value="View on Map"
+                                    valueStyle={{ color: COLORS.primaryDark }}
+                                />
+                            </TouchableOpacity>
+                        )}
+                        {item.grossHours !== "--" && (
+                            <Row icon="timer-outline" label="Gross Hours" value={item.grossHours} />
+                        )}
+                    </>
+                )}
             </View>
 
             <Modal visible={mapVisible} animationType="slide" transparent={true}>

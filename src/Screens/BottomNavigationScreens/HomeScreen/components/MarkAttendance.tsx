@@ -21,7 +21,9 @@ import { getAttendance, postAttendance } from '../../../../services/attendanceSe
 const GOOGLE_MAPS_APIKEY = "AIzaSyAT2Au6vHqZt3x7pMpvhXl0yYgkz3ekpKo";
 Geocoder.init(GOOGLE_MAPS_APIKEY);
 
-const MarkAttendance = () => {
+type MarkAttendanceProps = { refreshKey?: number }
+
+const MarkAttendance = ({ refreshKey }: MarkAttendanceProps) => {
     const [currentTime, setCurrentTime] = useState('');
     const [currentDate, setCurrentDate] = useState('');
     const [currentAttendanceStatus, setCurrentAttendanceStatus] = useState<any>('');
@@ -49,6 +51,12 @@ const MarkAttendance = () => {
             fetchCurrentDayAttendance();
         }, [])
     );
+
+    useEffect(() => {
+        if (typeof refreshKey === 'number') {
+            fetchCurrentDayAttendance();
+        }
+    }, [refreshKey]);
 
     useEffect(() => {
         const getLocation = async () => {
@@ -157,6 +165,7 @@ const MarkAttendance = () => {
 
             const response = await getAttendance({
                 userId: user?._id || "",
+                subscriberId: user?.companyId?._id || "",
                 startDate: currentDay.format("YYYY-MM-DD"),
                 endDate: currentDay.format("YYYY-MM-DD"),
                 timeZone

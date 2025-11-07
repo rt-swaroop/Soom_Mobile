@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import { View, FlatList, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, FlatList, Text, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from "@react-navigation/native";
@@ -20,11 +20,13 @@ dayjs.extend(isoWeek);
 const AttendanceScreen = () => {
     const [currentWeek, setCurrentWeek] = useState(dayjs());
     const [attendanceData, setAttendanceData] = useState<{ attendanceDate: string;[key: string]: any }[]>([]);
+    const [publicHolidays, setPublicHolidays] = useState<{ _id: string; title: string; date: string; type: string }[]>([]);
     const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
     const user = useSelector(selectUser);
 
-    const weekStart = currentWeek.startOf("week");
-    const weekEnd = currentWeek.endOf("week");
+    const weekStart = currentWeek.startOf("isoWeek");
+    const weekEnd = currentWeek.endOf("isoWeek");
 
     const weekDays = useMemo(() => {
         return Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
@@ -38,13 +40,15 @@ const AttendanceScreen = () => {
 
             const response = await getAttendance({
                 userId: user?._id || "",
+                subscriberId: user?.companyId?._id || "",
                 startDate: weekStart.format("YYYY-MM-DD"),
                 endDate: weekEnd.format("YYYY-MM-DD"),
                 timeZone
             });
 
             if (response?.success) {
-                setAttendanceData(response?.attendance)
+                setAttendanceData(response?.attendance || []);
+                setPublicHolidays(response?.publicHolidays || []);
             } else {
                 showMessage({
                     message: "No attendance records found",
@@ -68,11 +72,28 @@ const AttendanceScreen = () => {
     useFocusEffect(
         useCallback(() => {
             fetchUserAttendance();
-        }, [currentWeek])
+        }, [user?._id])
     );
+
+    useEffect(() => {
+        fetchUserAttendance();
+    }, [currentWeek, user?._id]);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            await fetchUserAttendance();
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     const mergedData = weekDays.map((date) => {
         const formattedDate = date.format("YYYY-MM-DD");
+
+        const holiday = publicHolidays.find(
+            (h) => dayjs(h.date).format("YYYY-MM-DD") === formattedDate
+        );
 
         const existing = attendanceData.find(
             (item) =>
@@ -81,7 +102,6 @@ const AttendanceScreen = () => {
         );
 
         if (existing) {
-
             return {
                 id: existing._id,
                 date: formattedDate,
@@ -94,14 +114,30 @@ const AttendanceScreen = () => {
                 clockInLocation: existing?.clockinLocation
                     ? { latitude: existing?.clockinLocation?.latitude, longitude: existing?.clockinLocation?.longitude }
                     : null,
-
                 clockOutLocation: existing?.clockoutLocation
                     ? { latitude: existing?.clockoutLocation?.latitude, longitude: existing?.clockoutLocation?.longitude }
                     : null,
-
                 place: existing.place || "--",
                 grossHours: existing.grossHours || "--",
                 arrival: existing.arrival || "--",
+                isHoliday: !!holiday,
+                holidayTitle: holiday?.title || null,
+            };
+        }
+
+        if (holiday) {
+            return {
+                id: `holiday-${holiday._id}`,
+                date: formattedDate,
+                clockIn: "--",
+                clockOut: "--",
+                clockInLocation: null,
+                clockOutLocation: null,
+                place: "--",
+                grossHours: "--",
+                arrival: "--",
+                isHoliday: true,
+                holidayTitle: holiday.title,
             };
         }
 
@@ -115,6 +151,8 @@ const AttendanceScreen = () => {
             place: "--",
             grossHours: "--",
             arrival: "--",
+            isHoliday: false,
+            holidayTitle: null,
         };
     });
 
@@ -123,7 +161,7 @@ const AttendanceScreen = () => {
             <View style={styles.weekHeader}>
                 <TouchableOpacity
                     style={styles.navButton}
-                    onPress={() => setCurrentWeek(currentWeek.subtract(1, "week"))}
+                    onPress={() => setCurrentWeek(prev => prev.subtract(1, "week"))}
                 >
                     <Icon name="chevron-left" size={24} color="#fff" />
                 </TouchableOpacity>
@@ -134,13 +172,13 @@ const AttendanceScreen = () => {
 
                 <TouchableOpacity
                     style={styles.navButton}
-                    onPress={() => setCurrentWeek(currentWeek.add(1, "week"))}
+                    onPress={() => setCurrentWeek(prev => prev.add(1, "week"))}
                 >
                     <Icon name="chevron-right" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
-            {loading ? (
+            {loading && !refreshing ? (
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                     <ActivityIndicator size="large" color="#4c669f" />
                 </View>
@@ -150,6 +188,9 @@ const AttendanceScreen = () => {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => <AttendanceCard item={item} />}
                     contentContainerStyle={{ padding: 15 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 />
             )}
 

@@ -16,10 +16,10 @@ type MoreOptionsModalProps = {
 };
 
 const servicesData: Service[] = [
-    { id: "1", label: "Leaves", icon: "calendar-clear-outline" },
-    { id: "2", label: "Time-Off", icon: "alarm-outline" },
-    { id: "3", label: "Daily Report", icon: "clipboard-outline" },
-    // { id: "2", label: "Shifts", icon: "alarm-outline" },
+    { id: "1", label: "Daily Report", icon: "clipboard-outline" },
+    { id: "2", label: "Shifts", icon: "time-outline" },
+    { id: "3", label: "Leaves", icon: "calendar-clear-outline" },
+    { id: "4", label: "Time-Off", icon: "alarm-outline" },
     // { id: "4", label: "To-do", icon: "checkbox-outline" },
     // { id: "5", label: "Projects", icon: "briefcase-outline" },
     // { id: "6", label: "Tasks", icon: "clipboard-outline" },
@@ -96,9 +96,7 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         marginBottom: 10,
     },
-    row: {
-        // justifyContent: "space-between",
-    },
+    row: {},
     itemContainer: {
         width: "30%",
         marginTop: 10,

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,7 +14,9 @@ import { selectUser } from "../../../../redux/selector";
 
 import { getUpcomingAndPendingLeaves } from "../../../../services/leavesServices";
 
-const AppliedLeaves = () => {
+type AppliedLeavesProps = { refreshKey?: number; onRefreshComplete?: () => void };
+
+const AppliedLeaves = ({ refreshKey, onRefreshComplete }: AppliedLeavesProps) => {
     const [leaves, setLeaves] = useState<any[]>([]);
 
     const [loading, setLoading] = useState(false);
@@ -51,6 +53,14 @@ const AppliedLeaves = () => {
             fetchUpcomingAndpendingLeaves();
         }, [user?._id])
     );
+
+    React.useEffect(() => {
+        if (typeof refreshKey === 'number' && refreshKey > 0) {
+            fetchUpcomingAndpendingLeaves().finally(() => {
+                onRefreshComplete?.();
+            });
+        }
+    }, [refreshKey]);
 
     const LeaveCard = ({ item }: { item: any }) => {
 
@@ -176,7 +186,7 @@ const AppliedLeaves = () => {
 
     if (loading) {
         return (
-            <View style={[styles.loader, { justifyContent: 'center' }]}>
+            <View style={[styles.loader, { justifyContent: 'center', minHeight: 100 }]}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
             </View>
         );
@@ -185,19 +195,17 @@ const AppliedLeaves = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>Upcoming / Pending</Text>
-            <FlatList
-                data={leaves}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => <LeaveCard item={item} />}
-                ListEmptyComponent={
-                    <View style={styles.emptyBox}>
-                        <Text style={styles.emptyText}>No applied leaves</Text>
-                    </View>
-                }
-                contentContainerStyle={styles.listContainer}
-                showsVerticalScrollIndicator={false}
-
-            />
+            {leaves.length === 0 ? (
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>No applied leaves</Text>
+                </View>
+            ) : (
+                <View style={styles.listContainer}>
+                    {leaves.map((item) => (
+                        <LeaveCard key={item._id} item={item} />
+                    ))}
+                </View>
+            )}
         </View>
     );
 };

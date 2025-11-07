@@ -8,6 +8,9 @@
     "lint": "eslint .",
     "start": "react-native start",
     "android:buildclean": "rm -rf android/app/.cxx && rm -rf android/app/build && echo 'Android build cleaned!'",
+    "android:clean": "cd android && ./gradlew clean && cd ..",
+    "android:prod": "cd android && ./gradlew bundleRelease && cd ..",
+    "android:apk": "cd android && ./gradlew assembleRelease && cd ..",
     "test": "jest"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from '@react-navigation/native';
@@ -14,7 +14,9 @@ import { selectUser } from "../../../../redux/selector";
 
 import { getUpcomingAndPendingTimeoff } from "../../../../services/timeoffServices";
 
-const AppliedTimeoff = () => {
+type AppliedTimeoffProps = { refreshKey?: number; onRefreshComplete?: () => void };
+
+const AppliedTimeoff = ({ refreshKey, onRefreshComplete }: AppliedTimeoffProps) => {
 
     const [timeOffs, setTimeOffs] = useState<any[]>([]);
 
@@ -52,6 +54,14 @@ const AppliedTimeoff = () => {
             fetchUpcomingAndpendingTimeoff();
         }, [user?._id])
     );
+
+    React.useEffect(() => {
+        if (typeof refreshKey === 'number' && refreshKey > 0) {
+            fetchUpcomingAndpendingTimeoff().finally(() => {
+                onRefreshComplete?.();
+            });
+        }
+    }, [refreshKey]);
 
     const TimeoffCard = ({ item }: { item: any }) => {
 
@@ -188,7 +198,7 @@ const AppliedTimeoff = () => {
 
     if (loading) {
         return (
-            <View style={[styles.loader, { justifyContent: 'center' }]}>
+            <View style={[styles.loader, { justifyContent: 'center', minHeight: 100 }]}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
             </View>
         );
@@ -197,19 +207,17 @@ const AppliedTimeoff = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.sectionTitle}>Upcoming / Pending</Text>
-            <FlatList
-                data={timeOffs}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => <TimeoffCard item={item} />}
-                ListEmptyComponent={
-                    <View style={styles.emptyBox}>
-                        <Text style={styles.emptyText}>No applied timeoffs</Text>
-                    </View>
-                }
-                contentContainerStyle={styles.listContainer}
-                showsVerticalScrollIndicator={false}
-            />
-
+            {timeOffs.length === 0 ? (
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>No applied timeoffs</Text>
+                </View>
+            ) : (
+                <View style={styles.listContainer}>
+                    {timeOffs.map((item) => (
+                        <TimeoffCard key={item._id} item={item} />
+                    ))}
+                </View>
+            )}
         </View>
     )
 }

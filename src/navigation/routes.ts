@@ -14,7 +14,9 @@ export const ROUTES = {
     ADDEDITTIMEOFF: 'AddEditTimeoff',
 
     DAILYREPORTS: 'DailyReports',
-    SUBMITDAILYREPORT: 'SubmitDailyReport'
+    SUBMITDAILYREPORT: 'SubmitDailyReport',
+
+    SHIFTS: 'Shifts',
 } as const
 
 export type RouteName = typeof ROUTES[keyof typeof ROUTES];
