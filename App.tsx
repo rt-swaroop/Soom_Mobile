@@ -26,7 +26,11 @@ function App() {
             position="top"
             statusBarHeight={Platform.OS === "android" ? StatusBar.currentHeight : 44}
           />
-          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          <StatusBar
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            translucent
+            backgroundColor="transparent"
+          />
           <AppNavigator />
         </SafeAreaProvider>
       </PersistGate>

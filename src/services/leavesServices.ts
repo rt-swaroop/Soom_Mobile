@@ -43,3 +43,12 @@ export const applyLeave = async (data: { leaveType: string; startDate: string; e
         throw err.response?.data || err.message;
     }
 };
+
+export const getLeaveTypes = async (subscriberId: string) => {
+    try {
+        const response = await api.get(`${API_ROUTES.LEAVES}/get-leave-types/${subscriberId}`);
+        return response.data;
+    } catch (err: any) {
+        throw err.response?.data || err.message;
+    }
+};

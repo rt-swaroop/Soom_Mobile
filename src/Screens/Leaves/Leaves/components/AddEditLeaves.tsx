@@ -8,10 +8,10 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../../../theme/colors';
 import { selectUser } from '../../../../redux/selector';
 
-import DatePickerInput from '../../../../Components/DatePickerInput';
-import Dropdown from '../../../../Components/Dropdown';
+import DatePickerInput from '../../../../components/DatePickerInput';
+import Dropdown from '../../../../components/Dropdown';
 
-import { applyLeave } from '../../../../services/leavesServices';
+import { applyLeave, getLeaveTypes } from '../../../../services/leavesServices';
 
 const AddEditLeaves = (props: any) => {
 
@@ -21,6 +21,7 @@ const AddEditLeaves = (props: any) => {
     const [noOfDays, setNoOfDays] = useState<number>(0);
     const [contactNumber, setContactNumber] = useState<string>('');
     const [reason, setReason] = useState<string>('');
+    const [allLeaveTypes, setAllLeaveTypes] = useState<any[]>([]);
 
     const [loading, setLoading] = useState(false);
 
@@ -32,11 +33,10 @@ const AddEditLeaves = (props: any) => {
     const isEdit = props?.route?.params?.mode === 'edit';
     const isNonEdit = props?.route?.params?.mode === 'non-edit';
 
-    const leaveOptions = [
-        { label: 'Casual Leave', value: 'Casual Leave' },
-        { label: 'Sick Leave', value: 'Sick Leave' },
-        { label: 'Compensatory Leave (Comp Off)', value: 'Compensatory Leave (Comp Off)' },
-    ];
+    const leaveOptions = allLeaveTypes.map((type: any) => ({
+        label: type.leaveTypeName,
+        value: type.leaveTypeName,
+    }));
 
     useEffect(() => {
         if ((isEdit || isNonEdit) && item) {
@@ -55,6 +55,22 @@ const AddEditLeaves = (props: any) => {
             setReason('');
         }
     }, [isEdit, isNonEdit, item]);
+
+    useEffect(() => {
+        const fetchLeaveTypes = async () => {
+            if (user?.companyId?._id) {
+                try {
+                    const response = await getLeaveTypes(user.companyId._id);
+                    if (response?.leaveTypes) {
+                        setAllLeaveTypes(response.leaveTypes);
+                    }
+                } catch (error) {
+                    console.error("Error fetching leave types on mobile:", error);
+                }
+            }
+        };
+        fetchLeaveTypes();
+    }, [user?.companyId?._id]);
 
     useEffect(() => {
         if (startDate && endDate) {

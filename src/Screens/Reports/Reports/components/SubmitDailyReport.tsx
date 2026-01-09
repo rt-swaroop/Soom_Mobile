@@ -9,7 +9,8 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from '../DailyReports.styles'
 import { COLORS } from '../../../../theme/colors'
 
-import Dropdown from '../../../../Components/Dropdown';
+import Dropdown from "../../../../components/Dropdown";
+import DatePickerInput from "../../../../components/DatePickerInput";
 
 import { selectUser } from '../../../../redux/selector';
 
@@ -137,7 +138,13 @@ const SubmitDailyReport = () => {
 
     return (
         <KeyboardAvoidingWidget>
-            <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                style={styles.container}
+                contentContainerStyle={{ paddingBottom: 120 }}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+            >
                 <View style={{ marginTop: 8 }}>
                     {tasks.map((task, index) => (
                         <View key={index} style={styles.taskCard}>
@@ -158,6 +165,7 @@ const SubmitDailyReport = () => {
                                     style={styles.input}
                                     value={task.company}
                                     onChangeText={v => updateTask(index, 'company', v)}
+                                    returnKeyType="next"
                                 />
                             </View>
 
@@ -170,6 +178,7 @@ const SubmitDailyReport = () => {
                                     value={task.description}
                                     onChangeText={v => updateTask(index, 'description', v)}
                                     multiline
+                                    returnKeyType="done"
                                 />
                             </View>
 
@@ -240,7 +249,11 @@ const SubmitDailyReport = () => {
 }
 
 const KeyboardAvoidingWidget = ({ children }: { children: React.ReactNode }) => (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
         {children}
     </KeyboardAvoidingView>
 )

@@ -6,7 +6,7 @@ import { Text } from "react-native";
 import { ROUTES } from "../routes";
 import { COLORS } from "../../theme/colors";
 
-import Shifts from "../../Screens/MoreOptionScreen/ShiftsScreen/Shifts";
+import ShiftScreen from '../../screens/Shifts/Shifts/Shifts';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,7 +14,7 @@ const ShiftsStackNavigator = () => {
 
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name={ROUTES.SHIFTS} component={Shifts}
+            <Stack.Screen name="Shifts" component={ShiftScreen}
                 options={{
                     headerShown: true,
                     headerStyle: { backgroundColor: "transparent" },

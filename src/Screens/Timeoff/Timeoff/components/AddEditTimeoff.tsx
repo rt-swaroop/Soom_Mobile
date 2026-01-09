@@ -8,9 +8,9 @@ import { useNavigation } from '@react-navigation/native';
 import { COLORS } from '../../../../theme/colors';
 import { selectUser } from '../../../../redux/selector';
 
-import DatePickerInput from '../../../../Components/DatePickerInput';
-import TimePickerInput from '../../../../Components/TimePickerInput';
-import Dropdown from '../../../../Components/Dropdown';
+import DatePickerInput from '../../../../components/DatePickerInput';
+import TimePickerInput from '../../../../components/TimePickerInput';
+import Dropdown from '../../../../components/Dropdown';
 
 import { applyTimeOff } from '../../../../services/timeoffServices';
 

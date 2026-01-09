@@ -6,19 +6,25 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
 
+import { jwtDecode } from "jwt-decode";
 import { ROUTES } from "./routes";
 import { logoutUser, setUser } from "../redux/reducers/authReducer";
 import { selectAccessToken, selectRefeshToken, selectUser } from "../redux/selector";
 
 import { refreshToken as refreshApi } from "../services/authServices";
 
-import GetStartedScreen from "../Screens/GetStartedScreen/GetStarted";
-import LoginScreen from "../Screens/LoginScreen/Login";
+import GetStartedScreen from "../screens/Auth/GetStarted/GetStarted";
+import LoginScreen from "../screens/Auth/Login/Login";
+import RoleSelectionScreen from "../screens/Auth/RoleSelection/RoleSelection";
+
 import MainNavigator from "./BottomTabNavigator";
+
+import { ROLES } from "../utils/constants";
 
 export type RootStackParamList = {
     [ROUTES.GET_STARTED]: undefined;
     [ROUTES.LOGIN]: undefined;
+    [ROUTES.ROLE_SELECTION]: undefined;
     [ROUTES.HOME]: undefined;
 };
 
@@ -53,14 +59,29 @@ const AppNavigator = () => {
         const initAuth = async () => {
             await requestLocationPermission();
 
-            if (refreshToken) {
+            let shouldRefresh = true;
+
+            if (accessToken) {
+                try {
+                    const decoded: any = jwtDecode(accessToken);
+                    const currentTime = Date.now() / 1000;
+
+                    if (decoded.exp && decoded.exp > currentTime + 300) {
+                        shouldRefresh = false;
+                    }
+                } catch (e) {
+                    console.log("Token decode failed", e);
+                }
+            }
+
+            if (refreshToken && shouldRefresh) {
                 try {
                     const res = await refreshApi(refreshToken);
                     dispatch(
                         setUser({
                             user: res.user,
                             accessToken: res.accessToken,
-                            refreshToken,
+                            refreshToken: res.refreshToken || refreshToken,
                         })
                     );
                 } catch (err) {
@@ -72,20 +93,31 @@ const AppNavigator = () => {
         };
 
         initAuth();
-    }, [dispatch, refreshToken]);
+    }, [dispatch, refreshToken, accessToken]);
 
     if (loading) {
         return null;
     }
 
+    const getInitialRoute = () => {
+        if (!user || !accessToken) return ROUTES.GET_STARTED;
+
+        if (user.role === ROLES.COMPANY_ADMIN) {
+            return ROUTES.ROLE_SELECTION;
+        }
+
+        return ROUTES.HOME;
+    };
+
     return (
         <NavigationContainer>
             <Stack.Navigator
-                initialRouteName={user && accessToken ? ROUTES.HOME : ROUTES.GET_STARTED}
+                initialRouteName={getInitialRoute()}
                 screenOptions={{ headerShown: false }}
             >
                 <Stack.Screen name={ROUTES.GET_STARTED} component={GetStartedScreen} />
                 <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
+                <Stack.Screen name={ROUTES.ROLE_SELECTION} component={RoleSelectionScreen} />
                 <Stack.Screen name={ROUTES.HOME} component={MainNavigator} />
             </Stack.Navigator>
         </NavigationContainer>

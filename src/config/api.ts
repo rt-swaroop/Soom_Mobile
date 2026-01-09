@@ -38,14 +38,14 @@ api.interceptors.response.use(
                     token: refreshToken,
                 });
 
-                const { accessToken, user } = refreshResponse.data;
+                const { accessToken, user, refreshToken: newRefreshToken } = refreshResponse.data;
 
                 // update redux with new accessToken + user
                 store.dispatch(
                     setUser({
                         user,
                         accessToken,
-                        refreshToken, // keep old refresh token
+                        refreshToken: newRefreshToken || refreshToken, // use new one if available, else keep old
                     })
                 );
 

@@ -6,8 +6,8 @@ import { Text } from "react-native";
 import { ROUTES } from "../routes";
 import { COLORS } from "../../theme/colors";
 
-import DailyReports from "../../Screens/MoreOptionScreen/DailyReportsScreen/DailyReports";
-import SubmitDailyReport from "../../Screens/MoreOptionScreen/DailyReportsScreen/components/SubmitDailyReport";
+import DailyReports from '../../screens/Reports/Reports/DailyReports';
+import SubmitDailyReport from '../../screens/Reports/Reports/components/SubmitDailyReport';
 
 const Stack = createNativeStackNavigator();
 

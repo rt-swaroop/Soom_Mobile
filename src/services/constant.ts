@@ -1,4 +1,5 @@
-const BASE_URL = 'https://soom-api.remote-teams.in/api/soom'
+const BASE_URL = 'https://soom-api.remote-teams.in/api/soom';
+// const BASE_URL = 'http://10.0.2.2:4000/api/soom';
 
 const API_ROUTES = {
     AUTH: `${BASE_URL}/auth`,

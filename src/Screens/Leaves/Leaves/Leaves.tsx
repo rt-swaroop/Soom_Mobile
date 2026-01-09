@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 
 import { Text, View, TouchableOpacity, ScrollView, RefreshControl } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";

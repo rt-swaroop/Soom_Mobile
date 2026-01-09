@@ -15,4 +15,45 @@ export const COLORS = {
     lightBlue: '#F9FAFB',
 
     background: "#f5f5f5",
-};  
+
+    overlay: 'rgba(0,0,0,0.5)',
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255,255,255,0.9)',
+    accent: '#FF4B55',
+    accentGradientStart: '#FF4B55',
+    accentGradientEnd: '#D32F2F',
+    surface: 'rgba(255, 255, 255, 0.15)',
+    transparent: 'transparent',
+};
+
+export const lightTheme = {
+    ...COLORS,
+    background: '#FFFFFF',
+    text: '#111827',
+    textSecondary: '#4B5563',
+    gradientStart: '#F0F7FF',
+    gradientEnd: '#dbeafe',
+    glassCardBg: 'rgba(255,255,255,0.6)',
+    glassCardGradient: ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)'],
+    glassCardBorder: 'rgba(255,255,255,0.6)',
+    decoration: 'rgba(37, 99, 235, 0.15)',
+    iconColor: '#2563EB',
+    cardShadow: 'rgba(0, 0, 0, 0.15)',
+    inputBg: 'rgba(0, 0, 0, 0.05)',
+};
+
+export const darkTheme = {
+    ...COLORS,
+    background: '#111827',
+    text: '#FFFFFF',
+    textSecondary: 'rgba(255, 255, 255, 0.8)',
+    gradientStart: '#1e3a8a',
+    gradientEnd: '#111827',
+    glassCardBg: 'transparent',
+    glassCardGradient: ['rgba(255, 255, 255, 0.00)', 'rgba(255, 255, 255, 0.00)'],
+    glassCardBorder: 'rgba(255, 255, 255, 0.15)',
+    decoration: 'rgba(255, 255, 255, 0.08)',
+    iconColor: '#FFFFFF',
+    cardShadow: 'transparent',
+    inputBg: 'rgba(255, 255, 255, 0.05)',
+};

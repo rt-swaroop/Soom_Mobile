@@ -2,7 +2,7 @@
 import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { Text, View, TouchableOpacity, ActivityIndicator, Platform, UIManager, LayoutAnimation } from "react-native";
+import { Text, View, TouchableOpacity, ActivityIndicator, Platform, UIManager, LayoutAnimation, ScrollView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from "@react-navigation/native";

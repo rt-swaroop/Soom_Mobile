@@ -6,9 +6,10 @@ import { Text } from "react-native";
 import { ROUTES } from "../routes";
 import { COLORS } from "../../theme/colors";
 
-import Timeoff from "../../Screens/MoreOptionScreen/TimeoffScreen/Timeoff";
-import AddEditTimeoff from "../../Screens/MoreOptionScreen/TimeoffScreen/components/AddEditTimeoff";
-import TimeOffHistory from "../../Screens/MoreOptionScreen/TimeoffScreen/components/TimeOffHistory";
+import Timeoff from "../../screens/Timeoff/Timeoff/Timeoff";
+import AppliedTimeoff from "../../screens/Timeoff/Timeoff/components/AppliedTimeoff";
+import TimeOffHistory from "../../screens/Timeoff/Timeoff/components/TimeOffHistory";
+import AddEditTimeoff from "../../screens/Timeoff/Timeoff/components/AddEditTimeoff";
 
 const Stack = createNativeStackNavigator();
 

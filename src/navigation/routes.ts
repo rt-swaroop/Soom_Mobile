@@ -16,6 +16,7 @@ export const ROUTES = {
     DAILYREPORTS: 'DailyReports',
     SUBMITDAILYREPORT: 'SubmitDailyReport',
 
+    ROLE_SELECTION: 'RoleSelection',
     SHIFTS: 'Shifts',
 } as const
 
