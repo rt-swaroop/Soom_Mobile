@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, RefreshControl, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import IconMC from 'react-native-vector-icons/MaterialCommunityIcons';
 import { showMessage } from 'react-native-flash-message';
 
@@ -11,13 +10,16 @@ import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 dayjs.extend(isoWeek);
 
-import { styles } from './Shifts.styles'
+import { createStyles } from './Shifts.styles'
 import { COLORS } from '../../../theme/colors';
+import { useAppTheme } from '../../../theme/useAppTheme';
 
 import { selectUser } from '../../../redux/selector';
 
 import { getUserShifts } from '../../../services/shiftServices';
 import ShiftCard from './components/ShiftCard';
+import CustomDateRangePicker from '../../../components/CustomDateRangePicker/CustomDateRangePicker';
+import ShiftSkeleton from '../../../components/Skeleton/ShiftSkeleton';
 
 type ShiftData = {
     _id: string;
@@ -58,10 +60,31 @@ type ShiftsResponse = {
 const Shifts = () => {
     const user = useSelector(selectUser);
 
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [shiftsData, setShiftsData] = useState<ShiftsResponse | null>(null);
-    const [weekStart, setWeekStart] = useState(dayjs().startOf('isoWeek'));
+    const [startDate, setStartDate] = useState(dayjs().startOf('isoWeek'));
+    const [endDate, setEndDate] = useState(dayjs().endOf('isoWeek'));
+    const [showPicker, setShowPicker] = useState(false);
+    const [showWeekDropdown, setShowWeekDropdown] = useState(false);
+
+    const pastWeeks = useMemo(() => {
+        const weeks = [];
+        for (let i = 0; i < 5; i++) {
+            const start = dayjs().subtract(i, 'week').startOf('isoWeek');
+            const end = dayjs().subtract(i, 'week').endOf('isoWeek');
+            weeks.push({
+                label: i === 0 ? "Current Week" : `Last ${i} Week${i > 1 ? 's' : ''}`,
+                range: `${start.format("MMM DD")} - ${end.format("MMM DD")}`,
+                start,
+                end
+            });
+        }
+        return weeks;
+    }, []);
 
     const timeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
@@ -69,10 +92,10 @@ const Shifts = () => {
         const useSpinner = options?.useSpinner ?? true;
         if (useSpinner) setLoading(true);
         try {
-            const startDate = weekStart.startOf('isoWeek').format('YYYY-MM-DD');
-            const endDate = weekStart.endOf('isoWeek').format('YYYY-MM-DD');
+            const formattedStartDate = startDate.format('YYYY-MM-DD');
+            const formattedEndDate = endDate.format('YYYY-MM-DD');
 
-            const formattedData = { startDate, endDate };
+            const formattedData = { startDate: formattedStartDate, endDate: formattedEndDate };
             const data = { formattedData, timeZone };
 
             const response: ShiftsResponse = await getUserShifts({
@@ -107,7 +130,7 @@ const Shifts = () => {
     useFocusEffect(
         useCallback(() => {
             loadShifts({ useSpinner: true });
-        }, [weekStart])
+        }, [startDate, endDate])
     );
 
     useEffect(() => {
@@ -119,9 +142,10 @@ const Shifts = () => {
     const mergedData = useMemo(() => {
         if (!shiftsData) return [];
 
-        const weekDays = Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
+        const daysCount = endDate.diff(startDate, 'day') + 1;
+        const dateRange = Array.from({ length: daysCount > 0 ? daysCount : 0 }, (_, i) => startDate.add(i, "day"));
 
-        return weekDays.map((date) => {
+        return dateRange.map((date) => {
             const formattedDate = date.format("YYYY-MM-DD");
             const dayName = date.format("dddd");
 
@@ -141,49 +165,100 @@ const Shifts = () => {
                 isWorkingDay,
             };
         });
-    }, [shiftsData, weekStart]);
+    }, [shiftsData, startDate, endDate]);
+
+    const handleApplyRange = (start: dayjs.Dayjs, end: dayjs.Dayjs) => {
+        setStartDate(start);
+        setEndDate(end);
+    };
+
+    const handleWeekSelect = (week: any) => {
+        setStartDate(week.start);
+        setEndDate(week.end);
+        setShowWeekDropdown(false);
+    };
+
+    const isCurrentRange = (start: dayjs.Dayjs, end: dayjs.Dayjs) => {
+        return startDate.isSame(start, 'day') && endDate.isSame(end, 'day');
+    };
 
     const renderItem = ({ item }: { item: typeof mergedData[0] }) => {
         return <ShiftCard date={item.date} dayName={item.dayName} shift={item.shift} holiday={item.holiday} />;
     };
 
-    const weekStartFormatted = weekStart.startOf('isoWeek');
-    const weekEndFormatted = weekStart.endOf('isoWeek');
 
     const WeekHeader = (
-        <View style={styles.weekHeader}>
-            <TouchableOpacity
-                style={styles.navButton}
-                onPress={() => setWeekStart(prev => dayjs(prev).subtract(1, 'week'))}
-            >
-                <IconMC name="chevron-left" size={24} color={COLORS.white} />
+        <View style={styles.headerRow}>
+            <TouchableOpacity style={styles.weekHeader} onPress={() => setShowWeekDropdown(true)}>
+                <Text style={styles.weekText}>
+                    {startDate.format("MMM DD")} - {endDate.format("MMM DD")}
+                </Text>
+                <IconMC name="chevron-down" size={18} color={theme.textSecondary} />
             </TouchableOpacity>
 
-            <Text style={styles.weekText}>
-                {weekStartFormatted.format("MMM DD")} - {weekEndFormatted.format("MMM DD")}
-            </Text>
-
             <TouchableOpacity
                 style={styles.navButton}
-                onPress={() => setWeekStart(prev => dayjs(prev).add(1, 'week'))}
+                onPress={() => setShowPicker(true)}
             >
-                <IconMC name="chevron-right" size={24} color={COLORS.white} />
+                <IconMC name="calendar-month" size={24} color="#fff" />
             </TouchableOpacity>
         </View>
     );
 
     if (loading && !refreshing) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
+            <View style={styles.container}>
+                <View style={{ flex: 1 }}>
+                    {WeekHeader}
+                    <FlatList
+                        data={[1, 2, 3, 4, 5]}
+                        keyExtractor={(item) => item.toString()}
+                        renderItem={() => <ShiftSkeleton />}
+                        contentContainerStyle={{ padding: 16 }}
+                    />
+                </View>
             </View>
         );
     }
 
     return (
         <View style={styles.container}>
-            <View>
+            <View style={{ flex: 1 }}>
                 {WeekHeader}
+
+                {showWeekDropdown && (
+                    <Modal transparent animationType="none">
+                        <TouchableWithoutFeedback onPress={() => setShowWeekDropdown(false)}>
+                            <View style={styles.dropdownOverlay}>
+                                <View style={styles.dropdownMenu}>
+                                    {pastWeeks.map((week, idx) => {
+                                        const active = isCurrentRange(week.start, week.end);
+                                        return (
+                                            <TouchableOpacity
+                                                key={idx}
+                                                style={[styles.dropdownItem, active && styles.activeDropdownItem]}
+                                                onPress={() => handleWeekSelect(week)}
+                                            >
+                                                <Text style={[styles.dropdownItemText, active && styles.activeDropdownItemText]}>
+                                                    {week.range} ({week.label})
+                                                </Text>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
+                )}
+
+                <CustomDateRangePicker
+                    visible={showPicker}
+                    onClose={() => setShowPicker(false)}
+                    onApply={handleApplyRange}
+                    initialStartDate={startDate}
+                    initialEndDate={endDate}
+                />
+
                 <FlatList
                     data={mergedData}
                     keyExtractor={(item) => item.date}

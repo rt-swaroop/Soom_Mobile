@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,14 +9,19 @@ import Icon from "react-native-vector-icons/Feather";
 
 import { COLORS } from "../../../../theme/colors";
 import { ROUTES } from "../../../../navigation/routes";
+import { useAppTheme } from "../../../../theme/useAppTheme";
+import { createStyles } from "../Timeoff.styles";
 
 import { selectUser } from "../../../../redux/selector";
 
 import { getUpcomingAndPendingTimeoff } from "../../../../services/timeoffServices";
+import { AppliedCardSkeleton } from "../../../../components/Skeleton/LeaveSkeleton";
 
 type AppliedTimeoffProps = { refreshKey?: number; onRefreshComplete?: () => void };
 
 const AppliedTimeoff = ({ refreshKey, onRefreshComplete }: AppliedTimeoffProps) => {
+    const { theme } = useAppTheme();
+    const styles = React.useMemo(() => createStyles(theme), [theme]);
 
     const [timeOffs, setTimeOffs] = useState<any[]>([]);
 
@@ -196,18 +201,14 @@ const AppliedTimeoff = ({ refreshKey, onRefreshComplete }: AppliedTimeoffProps) 
 
     }
 
-    if (loading) {
-        return (
-            <View style={[styles.loader, { justifyContent: 'center', minHeight: 100 }]}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-        );
-    }
-
     return (
-        <View style={styles.container}>
-            <Text style={styles.sectionTitle}>Upcoming / Pending</Text>
-            {timeOffs.length === 0 ? (
+        <View style={{ marginBottom: 20 }}>
+            <Text style={styles.sectionTitle}>Applied Timeoff</Text>
+            {loading ? (
+                <View style={styles.listContainer}>
+                    {[1, 2].map((i) => <AppliedCardSkeleton key={i} />)}
+                </View>
+            ) : timeOffs.length === 0 ? (
                 <View style={styles.emptyBox}>
                     <Text style={styles.emptyText}>No applied timeoffs</Text>
                 </View>
@@ -219,130 +220,7 @@ const AppliedTimeoff = ({ refreshKey, onRefreshComplete }: AppliedTimeoffProps) 
                 </View>
             )}
         </View>
-    )
-}
+    );
+};
 
-export default AppliedTimeoff
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        marginBottom: 20
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 12
-    },
-    emptyBox: {
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-    },
-    emptyText: {
-        color: "#9CA3AF",
-        fontSize: 14,
-        fontStyle: "italic"
-    },
-    listContainer: {
-        paddingVertical: 10,
-        paddingHorizontal: 4,
-    },
-    cardContainer: {
-        flexDirection: "row",
-        backgroundColor: COLORS.white,
-        borderRadius: 14,
-        marginHorizontal: 8,
-        marginVertical: 4,
-        padding: 12,
-        shadowColor: COLORS.black,
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    statusIndicator: {
-        width: 6,
-        borderRadius: 3,
-    },
-    cardContent: {
-        flex: 1,
-        marginLeft: 12,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 6,
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    statusBadgeContainer: {
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 12,
-    },
-    statusBadgeText: {
-        color: COLORS.white,
-        fontSize: 12,
-        fontWeight: '600',
-    },
-    infoRow: {
-        flexDirection: 'row',
-        marginVertical: 2,
-    },
-    infoLabel: {
-        fontWeight: '500',
-        color: '#4B5563',
-        marginRight: 4,
-    },
-    infoValue: {
-        fontWeight: '600',
-        color: '#111827',
-    },
-    statusRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 6,
-    },
-    statusText: {
-        fontSize: 12,
-        color: '#374151',
-    },
-    statusBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#2ecc7133",
-        borderRadius: 20,
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-    },
-    approverRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 6,
-    },
-    approvedByLabel: {
-        fontSize: 14,
-        color: '#6B7280',
-        marginRight: 4,
-    },
-    approvedByName: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#111827',
-    },
-    avatar: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        marginHorizontal: 4,
-    },
-    loader: {
-        flex: 1,
-        backgroundColor: COLORS.lightBlue,
-    },
-})
+export default AppliedTimeoff;

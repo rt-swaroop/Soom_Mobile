@@ -17,4 +17,15 @@ export const refreshToken = async (refreshToken: string) => {
     } catch (err: any) {
         throw err.response?.data || err.message;
     }
-};  
+};
+
+export const checkAppVersion = async (platform: string, currentVersion: string) => {
+    try {
+        const response = await api.get(`${API_ROUTES.APP_VERSION}/check`, {
+            params: { platform, currentVersion }
+        });
+        return response.data;
+    } catch (err: any) {
+        throw err.response?.data || err.message;
+    }
+};

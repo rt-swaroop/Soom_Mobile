@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "589347147784",
+    "project_id": "soom-cfc46",
+    "storage_bucket": "soom-cfc46.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589347147784:android:d59df7054cb8f9b50f81bd",
+        "android_client_info": {
+          "package_name": "com.soom_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwZvUgXJLTWwAOzgzxnaAFjlvHePi0c7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

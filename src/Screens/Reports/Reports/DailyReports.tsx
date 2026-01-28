@@ -1,22 +1,26 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
-import { View, Text, TouchableOpacity, FlatList, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Modal, TouchableWithoutFeedback } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-import { styles } from './DailyReports.styles';
+import { createStyles } from './DailyReports.styles';
 import { ROUTES } from '../../../navigation/routes';
 import { COLORS } from '../../../theme/colors';
+import { useAppTheme } from '../../../theme/useAppTheme';
 
 import { selectUser } from '../../../redux/selector';
 
 import DailyReportCard from './components/DailyReportCard';
+import DailyReportSkeleton from '../../../components/Skeleton/DailyReportSkeleton';
+import CustomDateRangePicker from '../../../components/CustomDateRangePicker/CustomDateRangePicker';
+
 import { getDailyReports } from '../../../services/dailyReportsServices';
 
 dayjs.extend(customParseFormat);
@@ -42,109 +46,148 @@ interface DailyReportData {
 }
 
 const DailyReports = () => {
-    const today = dayjs();
-    const [dailyReport, setDailyReport] = useState<DailyReportData | null>(null)
-    const [selectedDate, setSelectedDate] = useState(today);
-    const [weekStart, setWeekStart] = useState(today.startOf('isoWeek'));
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
+    const today = dayjs();
+    const [dailyReport, setDailyReport] = useState<DailyReportData | null>(null);
+    const [selectedDate, setSelectedDate] = useState(today);
+    const [showPicker, setShowPicker] = useState(false);
+    const [showDateDropdown, setShowDateDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const user = useSelector(selectUser);
-
     const navigation = useNavigation<NavigationProp<any>>();
 
-    const weekDays = Array.from({ length: 7 }, (_, i) => weekStart.add(i, 'day'));
     const isToday = selectedDate.isSame(today, 'day');
 
-    const fetchDailyReports = async () => {
+    const pastDates = useMemo(() => {
+        const dates = [];
+        for (let i = 0; i < 5; i++) {
+            dates.push(dayjs().subtract(i, 'day'));
+        }
+        return dates;
+    }, []);
 
+    const fetchDailyReports = useCallback(async () => {
         if (!user?._id) return;
 
-        setLoading(true)
+        setLoading(true);
         try {
+            const formattedDate = selectedDate.format('YYYY-MM-DD');
+            const response = await getDailyReports({
+                userId: user._id,
+                formattedDate,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            });
 
-            const formattedDate = dayjs(selectedDate).format('YYYY-MM-DD');
-
-            const response = await getDailyReports({ userId: user._id, formattedDate, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone })
-
-            setDailyReport(response?.data || null)
-
+            setDailyReport(response?.data || null);
         } catch (error) {
-            console.error("Error fetching leave history:", error);
+            console.error("Error fetching daily reports:", error);
             showMessage({
-                message: "Error fetching leave history",
-                description: "Unable to retrieve leave history. Please try again later.",
+                message: "Error fetching reports",
                 type: "danger",
-                duration: 3000,
             });
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    }, [user?._id, selectedDate]);
 
     useFocusEffect(
         useCallback(() => {
             fetchDailyReports();
-        }, [user?._id, selectedDate])
+        }, [fetchDailyReports])
     );
 
-    const handlePrevWeek = () => {
-        const newStart = weekStart.subtract(1, 'week');
-        setWeekStart(newStart);
-        setSelectedDate(newStart);
+    useEffect(() => {
+        fetchDailyReports();
+    }, [fetchDailyReports]);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchDailyReports();
+        setRefreshing(false);
     };
 
-    const handleNextWeek = () => {
-        const newStart = weekStart.add(1, 'week');
-        setWeekStart(newStart);
-        setSelectedDate(newStart);
+    const handleApplyDate = (start: dayjs.Dayjs) => {
+        setSelectedDate(start);
     };
 
-    if (loading) {
-        return (
-            <View style={[styles.loader, { justifyContent: 'center' }]}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-        );
-    }
+    const handleQuickDateSelect = (date: dayjs.Dayjs) => {
+        setSelectedDate(date);
+        setShowDateDropdown(false);
+    };
 
     return (
         <View style={styles.mainContainer}>
             <ScrollView
                 style={styles.container}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 100 }}
+                contentContainerStyle={{ paddingBottom: 120 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+                }
             >
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <TouchableOpacity onPress={handlePrevWeek}>
-                        <Icon name="chevron-left" size={28} color={COLORS.primary} />
+                <View style={styles.headerRow}>
+                    <TouchableOpacity
+                        style={styles.dateDisplay}
+                        onPress={() => setShowDateDropdown(true)}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={styles.dateHeaderText}>
+                            {selectedDate.format('MMMM DD, YYYY')}
+                        </Text>
+                        <Icon name="chevron-down" size={20} color={theme.textSecondary} />
                     </TouchableOpacity>
 
-                    <FlatList
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        data={weekDays}
-                        keyExtractor={(item) => item.format('YYYY-MM-DD')}
-                        renderItem={({ item }) => {
-                            const isSelected = item.isSame(selectedDate, 'day');
-                            return (
-                                <TouchableOpacity onPress={() => setSelectedDate(item)} style={styles.dayContainer}>
-                                    <Text style={styles.dayText}>{item.format('ddd')}</Text>
-                                    <View style={[styles.circle, isSelected && styles.selectedCircle]}>
-                                        <Text style={[styles.dateText, isSelected && styles.selectedDateText]}>
-                                            {item.format('D')}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            );
-                        }}
-                        contentContainerStyle={{ paddingBottom: 12 }}
-                    />
-
-                    <TouchableOpacity onPress={handleNextWeek}>
-                        <Icon name="chevron-right" size={28} color={COLORS.primary} />
+                    <TouchableOpacity
+                        style={styles.calendarBtn}
+                        onPress={() => setShowPicker(true)}
+                        activeOpacity={0.8}
+                    >
+                        <Icon name="calendar-search" size={22} color={COLORS.white} />
                     </TouchableOpacity>
                 </View>
+
+                {/* Quick Date Dropdown */}
+                {showDateDropdown && (
+                    <Modal transparent animationType="fade">
+                        <TouchableWithoutFeedback onPress={() => setShowDateDropdown(false)}>
+                            <View style={styles.dropdownOverlay}>
+                                <View style={styles.dropdownMenu}>
+                                    {pastDates.map((date, idx) => {
+                                        const active = selectedDate.isSame(date, 'day');
+                                        return (
+                                            <React.Fragment key={idx}>
+                                                <TouchableOpacity
+                                                    style={[styles.dropdownItem, active && styles.activeDropdownItem]}
+                                                    onPress={() => handleQuickDateSelect(date)}
+                                                >
+                                                    <Text style={[styles.dropdownItemText, active && styles.activeDropdownItemText]}>
+                                                        {idx === 0 ? "Today, " : ""}{date.format('MMM DD, YYYY')}
+                                                    </Text>
+                                                    {active && <Icon name="check" size={18} color={COLORS.primary} style={{ marginLeft: 'auto' }} />}
+                                                </TouchableOpacity>
+                                                {idx < pastDates.length - 1 && <View style={styles.dropdownDivider} />}
+                                            </React.Fragment>
+                                        );
+                                    })}
+                                    <TouchableOpacity
+                                        style={[styles.dropdownItem, styles.calendarOption]}
+                                        onPress={() => {
+                                            setShowDateDropdown(false);
+                                            setShowPicker(true);
+                                        }}
+                                    >
+                                        <Icon name="calendar-month" size={20} color={theme.textSecondary} style={{ marginRight: 10 }} />
+                                        <Text style={[styles.dropdownItemText, { color: theme.textSecondary }]}>Open Calendar</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </Modal>
+                )}
 
                 {isToday && dailyReport && (
                     <View style={styles.editButtonContainer}>
@@ -157,50 +200,46 @@ const DailyReports = () => {
                                 })
                             }
                         >
-                            <Icon name="edit" size={18} color={COLORS.white} />
-                            <Text style={styles.editButtonText}>
-                                Edit
-                            </Text>
+                            <Icon name="pencil" size={18} color="#3B82F6" />
+                            <Text style={styles.editButtonText}>Edit Report</Text>
                         </TouchableOpacity>
                     </View>
                 )}
 
-                <View style={{ marginTop: 4, marginBottom: 12 }}>
-                    {dailyReport && Array.isArray(dailyReport.tasks) && dailyReport.tasks.length > 0 ? (
+                <View style={{ marginTop: 4 }}>
+                    {loading && !refreshing ? (
+                        [1, 2, 3].map((i) => <DailyReportSkeleton key={i} />)
+                    ) : dailyReport && Array.isArray(dailyReport.tasks) && dailyReport.tasks.length > 0 ? (
                         dailyReport.tasks.map((task) => (
                             <DailyReportCard key={task._id} task={task} />
                         ))
                     ) : (
-                        <>
-                            {isToday ? (
-                                <TouchableOpacity
-                                    style={styles.emptyStateContainer}
-                                    onPress={() => navigation.navigate(ROUTES.SUBMITDAILYREPORT)}
-                                >
-                                    <Icon name="add-circle-outline" size={80} color={COLORS.gray} />
-                                    <Text style={styles.emptyStateText}>
-                                        No reports for today
-                                    </Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <View style={styles.emptyStateContainer}>
-                                    <Text style={styles.emptyStateText}>
-                                        No reports for this day
-                                    </Text>
-                                </View>
-                            )}
-                        </>
+                        <View style={styles.emptyStateContainer}>
+                            <TouchableOpacity
+                                style={styles.emptyStateIconWrapper}
+                                onPress={() => navigation.navigate(ROUTES.SUBMITDAILYREPORT)}
+                                activeOpacity={0.7}
+                            >
+                                <Icon
+                                    name={isToday ? "plus" : "file-search-outline"}
+                                    size={56}
+                                    color={COLORS.primary}
+                                />
+                            </TouchableOpacity>
+                            <Text style={styles.emptyStateText}>
+                                {isToday ? "No reports submitted yet for today" : "No reports found for this date"}
+                            </Text>
+                        </View>
                     )}
                 </View>
-
             </ScrollView>
 
-            <View style={styles.fixedButtonContainer}>
-                {dailyReport?.submittedDate && (
-                    (() => {
+            {dailyReport?.submittedDate && (
+                <View style={styles.fixedButtonContainer}>
+                    {(() => {
                         const totalMinutes =
                             dailyReport.tasks?.reduce(
-                                (acc, t) => acc + t.hours * 60 + t.minutes,
+                                (acc, t) => acc + t.hours * 60 + (t.minutes || 0),
                                 0
                             ) || 0;
 
@@ -209,17 +248,26 @@ const DailyReports = () => {
 
                         return (
                             <View style={styles.submitButton}>
+                                <Icon name="clock-outline" size={20} color={COLORS.white} style={{ marginRight: 8 }} />
                                 <Text style={styles.submitButtonText}>
-                                    Total Time:- {totalHours}h {remainingMinutes}m
+                                    TOTAL TIME: {totalHours}h {remainingMinutes}m
                                 </Text>
                             </View>
                         );
-                    })()
-                )}
-            </View>
+                    })()}
+                </View>
+            )}
+
+            <CustomDateRangePicker
+                visible={showPicker}
+                onClose={() => setShowPicker(false)}
+                onApply={handleApplyDate}
+                initialStartDate={selectedDate}
+                initialEndDate={selectedDate}
+                selectionMode="single"
+            />
         </View>
     );
-
 };
 
 export default DailyReports;

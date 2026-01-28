@@ -1,20 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, StatusBar, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 import { useNavigation } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
+import { createStyles } from '../Timeoff.styles';
 import { COLORS } from '../../../../theme/colors';
 import { selectUser } from '../../../../redux/selector';
+import { useAppTheme } from '../../../../theme/useAppTheme';
+import dayjs from 'dayjs';
 
-import DatePickerInput from '../../../../components/DatePickerInput';
+import CustomDateRangePicker from '../../../../components/CustomDateRangePicker/CustomDateRangePicker';
 import TimePickerInput from '../../../../components/TimePickerInput';
 import Dropdown from '../../../../components/Dropdown';
 
 import { applyTimeOff } from '../../../../services/timeoffServices';
 
 const AddEditTimeoff = (props: any) => {
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [selectedOption, setSelectedOption] = useState<string>('');
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
@@ -26,10 +35,11 @@ const AddEditTimeoff = (props: any) => {
     const [reason, setReason] = useState<string>('');
 
     const [loading, setLoading] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const user = useSelector(selectUser);
 
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
     const item = props?.route?.params?.item;
     const isEdit = props?.route?.params?.mode === 'edit';
@@ -128,6 +138,10 @@ const AddEditTimeoff = (props: any) => {
             setNoOfHours(0);
         }
     }, [startTime, endTime]);
+    const handleApplyDates = (start: dayjs.Dayjs, end: dayjs.Dayjs) => {
+        setStartDate(start.toISOString());
+        setEndDate(end.toISOString());
+    };
 
     const handleSubmit = async () => {
 
@@ -180,112 +194,173 @@ const AddEditTimeoff = (props: any) => {
     }
 
     return (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={styles.timeoffHistorycontainer}>
+            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-                <View style={styles.formRow}>
-                    <Dropdown
-                        label={'Time-off Type'}
-                        value={selectedOption}
-                        items={timeOffOptions}
-                        onSelect={setSelectedOption}
-                        placeholder={`Select Time-off Type`}
-                    />
-                </View>
+            <View style={styles.screenHeader}>
+                <LinearGradient
+                    colors={[COLORS.primary, COLORS.primaryDark]}
+                    style={styles.headerGradient}
+                >
+                    <View style={styles.headerContent}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={styles.headerBackButton}
+                        >
+                            <MIcon name="arrow-back" size={24} color="#FFF" />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>
+                            {isEdit ? 'Edit Time-off' : 'Apply Time-off'}
+                        </Text>
+                    </View>
+                </LinearGradient>
+            </View>
 
-                {(selectedOption === 'Work From Home') && (
-                    <>
-                        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                            <View style={{ flex: 1, marginRight: 8 }}>
-                                <DatePickerInput
-                                    label="Start Date"
-                                    date={startDate ? new Date(startDate) : null}
-                                    setDate={d => setStartDate(d.toISOString())}
-                                />
+            <KeyboardAwareScrollView
+                style={styles.container}
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+                enableOnAndroid={true}
+                extraScrollHeight={100}
+                enableAutomaticScroll={Platform.OS === 'ios'}
+            >
+                <View style={styles.card}>
+                    <View style={styles.formRow}>
+                        <Dropdown
+                            label={'Time-off Type'}
+                            value={selectedOption}
+                            items={timeOffOptions}
+                            title="Select Time-off Type"
+                            message="Choose the type of time-off you want to apply for."
+                            onSelect={setSelectedOption}
+                            placeholder={`Select Time-off Type`}
+                        />
+                    </View>
+
+                    {(selectedOption === 'Work From Home') && (
+                        <>
+                            <View style={{ marginBottom: 16 }}>
+                                <TouchableOpacity
+                                    onPress={() => setShowDatePicker(true)}
+                                    activeOpacity={0.7}
+                                    disabled={isNonEdit}
+                                >
+                                    <Text style={styles.infoLabel}>Time-off Duration</Text>
+                                    <View style={styles.dateInputBox}>
+                                        <Text style={styles.dateInputText}>
+                                            {startDate && endDate
+                                                ? `${dayjs(startDate).format('DD/MM/YYYY')} - ${dayjs(endDate).format('DD/MM/YYYY')}`
+                                                : 'Select Start & End Date'}
+                                        </Text>
+                                        <Icon name="calendar-month" size={20} color={COLORS.primary} />
+                                    </View>
+                                </TouchableOpacity>
                             </View>
-                            <View style={{ flex: 1 }}>
-                                <DatePickerInput
-                                    label="End Date"
-                                    date={endDate ? new Date(endDate) : null}
-                                    setDate={d => setEndDate(d.toISOString())}
-                                />
-                            </View>
-                        </View>
 
-                        {noOfDays > 0 && (
-                            <View style={styles.formRow}>
-                                <Text style={styles.label}>Total Days</Text>
-                                <View style={styles.readonlyInput}>
-                                    <Text style={styles.readonlyText}>
-                                        {noOfDays} Day{noOfDays > 1 ? 's' : ''}
-                                    </Text>
+                            {noOfDays > 0 && (
+                                <View style={{ marginBottom: 16 }}>
+                                    <Text style={styles.infoLabel}>Total Days</Text>
+                                    <View style={{
+                                        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
+                                        borderRadius: 12,
+                                        padding: 12,
+                                        marginTop: 6,
+                                    }}>
+                                        <Text style={styles.infoValue}>
+                                            {noOfDays} Day{noOfDays > 1 ? 's' : ''}
+                                        </Text>
+                                    </View>
+                                </View>
+                            )}
+                        </>
+                    )}
+
+                    {selectedOption === 'Half Day' && (
+                        <>
+                            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+                                <View style={{ flex: 1, marginRight: 8 }}>
+                                    <TimePickerInput
+                                        label="Start Time"
+                                        time={startTime}
+                                        setTime={setStartTime}
+                                    />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <TimePickerInput
+                                        label="End Time"
+                                        time={endTime}
+                                        setTime={setEndTime}
+                                    />
                                 </View>
                             </View>
-                        )}
-                    </>
-                )}
 
-                {selectedOption === 'Half Day' && (
-                    <>
-                        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                            <View style={{ flex: 1, marginRight: 8 }}>
-                                <TimePickerInput
-                                    label="Start Time"
-                                    time={startTime}
-                                    setTime={setStartTime}
-                                />
-                            </View>
-                            <View style={{ flex: 1 }}>
-                                <TimePickerInput
-                                    label="End Time"
-                                    time={endTime}
-                                    setTime={setEndTime}
-                                />
-                            </View>
-                        </View>
-
-                        {noOfHours > 0 && (
-                            <View style={styles.formRow}>
-                                <Text style={styles.label}>Total Hours</Text>
-                                <View style={styles.readonlyInput}>
-                                    <Text style={styles.readonlyText}>
-                                        {noOfHours} Hour{noOfHours > 1 ? 's' : ''}
-                                    </Text>
+                            {noOfHours > 0 && (
+                                <View style={{ marginBottom: 16 }}>
+                                    <Text style={styles.infoLabel}>Total Hours</Text>
+                                    <View style={{
+                                        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
+                                        borderRadius: 12,
+                                        padding: 12,
+                                        marginTop: 6,
+                                    }}>
+                                        <Text style={styles.infoValue}>
+                                            {noOfHours.toFixed(1)} Hour{noOfHours > 1 ? 's' : ''}
+                                        </Text>
+                                    </View>
                                 </View>
-                            </View>
-                        )}
-                    </>
-                )}
+                            )}
+                        </>
+                    )}
 
-                <View style={styles.formRow}>
-                    <Text style={styles.label}>Contact Number </Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter contact number"
-                        keyboardType="phone-pad"
-                        value={contactNumber}
-                        onChangeText={setContactNumber}
-                        maxLength={10}
-                    />
+                    <View style={{ marginBottom: 16 }}>
+                        <Text style={styles.infoLabel}>Contact Number <Text style={{ color: '#EF4444' }}>*</Text></Text>
+                        <TextInput
+                            style={{
+                                backgroundColor: theme.cardBg,
+                                borderWidth: 1,
+                                borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+                                borderRadius: 12,
+                                padding: 12,
+                                marginTop: 6,
+                                color: theme.text,
+                                fontSize: 14,
+                            }}
+                            placeholder="Enter contact number"
+                            placeholderTextColor={theme.textSecondary}
+                            keyboardType="phone-pad"
+                            value={contactNumber}
+                            onChangeText={setContactNumber}
+                            maxLength={10}
+                        />
+                    </View>
+
+                    <View style={{ marginBottom: 8 }}>
+                        <Text style={styles.infoLabel}>Reason <Text style={{ color: '#EF4444' }}>*</Text></Text>
+                        <TextInput
+                            style={{
+                                backgroundColor: theme.cardBg,
+                                borderWidth: 1,
+                                borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+                                borderRadius: 12,
+                                padding: 12,
+                                marginTop: 6,
+                                color: theme.text,
+                                fontSize: 14,
+                                height: 100,
+                                textAlignVertical: 'top'
+                            }}
+                            placeholder="Enter reason"
+                            placeholderTextColor={theme.textSecondary}
+                            value={reason}
+                            onChangeText={setReason}
+                            multiline
+                        />
+                    </View>
                 </View>
 
-                <View style={styles.formRow}>
-                    <Text style={styles.label}>Reason</Text>
-                    <TextInput
-                        style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
-                        placeholder="Enter reason"
-                        value={reason}
-                        onChangeText={setReason}
-                        multiline
-                    />
-                </View>
-
-            </ScrollView>
-
-            {!isNonEdit && (
-                <View style={styles.footer}>
+                {!isNonEdit && (
                     <TouchableOpacity
-                        style={[styles.submitButton, loading && { opacity: 0.7 }]}
+                        style={[styles.applyBtn, loading && { opacity: 0.7 }]}
                         onPress={handleSubmit}
                         activeOpacity={0.85}
                         disabled={loading}
@@ -293,77 +368,23 @@ const AddEditTimeoff = (props: any) => {
                         {loading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Text style={styles.submitText}>
-                                {isEdit ? 'Update' : 'Submit'}
+                            <Text style={styles.applyText}>
+                                {isEdit ? 'UPDATE TIME-OFF' : 'SUBMIT TIME-OFF'}
                             </Text>
                         )}
                     </TouchableOpacity>
-                </View>
-            )}
+                )}
+            </KeyboardAwareScrollView>
+            <CustomDateRangePicker
+                visible={showDatePicker}
+                onClose={() => setShowDatePicker(false)}
+                onApply={handleApplyDates}
+                initialStartDate={startDate ? dayjs(startDate) : undefined}
+                initialEndDate={endDate ? dayjs(endDate) : undefined}
+                selectionMode="range"
+            />
+        </View>
+    );
+};
 
-        </KeyboardAvoidingView>
-    )
-}
-
-export default AddEditTimeoff
-
-const styles = StyleSheet.create({
-    container: {
-        padding: 18,
-        paddingBottom: 120,
-        backgroundColor: COLORS.lightBlue,
-        flexGrow: 1,
-    },
-    formRow: {
-        marginBottom: 12,
-        zIndex: 1000,
-    },
-    label: {
-        fontSize: 14,
-        color: COLORS.primaryDark,
-        marginBottom: 6,
-        fontWeight: '600',
-    },
-    readonlyInput: {
-        backgroundColor: COLORS.white,
-        borderWidth: 1,
-        borderColor: COLORS.gray2,
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        justifyContent: 'center',
-    },
-    readonlyText: {
-        color: COLORS.primaryDark,
-        fontSize: 15,
-    },
-    input: {
-        backgroundColor: COLORS.white,
-        borderWidth: 1,
-        borderColor: COLORS.gray2,
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 10,
-        fontSize: 15,
-        color: COLORS.primaryDark,
-    },
-    footer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 12,
-        backgroundColor: 'transparent',
-    },
-    submitButton: {
-        backgroundColor: COLORS.primary,
-        paddingVertical: 14,
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    submitText: {
-        color: COLORS.white,
-        fontSize: 16,
-        fontWeight: '700',
-    },
-})
+export default AddEditTimeoff;

@@ -16,15 +16,7 @@ const ShiftsStackNavigator = () => {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Shifts" component={ShiftScreen}
                 options={{
-                    headerShown: true,
-                    headerStyle: { backgroundColor: "transparent" },
-                    headerBackground: () => (
-                        <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={{ flex: 1 }} />
-                    ),
-                    headerTitle: () => (
-                        <Text style={{ color: COLORS.white, fontSize: 20, fontWeight: "700" }}>Shifts</Text>
-                    ),
-                    headerTintColor: COLORS.white,
+                    headerShown: false
                 }}
             />
         </Stack.Navigator>

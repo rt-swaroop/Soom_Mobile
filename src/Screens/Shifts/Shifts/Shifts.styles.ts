@@ -1,41 +1,56 @@
 import { StyleSheet } from "react-native";
-
 import { COLORS } from "../../../theme/colors";
+import { Theme } from "../../../theme/useAppTheme";
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.background,
+    },
+    headerRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 14,
+        paddingHorizontal: 24,
     },
     weekHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: COLORS.white,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: theme.cardBg,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 5,
+        shadowRadius: 10,
         elevation: 4,
     },
     weekText: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: COLORS.primary,
+        fontSize: 14,
+        fontWeight: "700",
+        color: theme.text,
+        marginRight: 6,
     },
     navButton: {
         backgroundColor: COLORS.primary,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        alignItems: 'center',
-        justifyContent: 'center',
+        width: 44,
+        height: 44,
+        borderRadius: 14,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: COLORS.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.25,
+        shadowRadius: 10,
+        elevation: 6,
     },
     card: {
         borderRadius: 12,
-        backgroundColor: '#fff',
+        backgroundColor: theme.cardBg,
         padding: 16,
         shadowColor: '#000',
         shadowOpacity: 0.08,
@@ -51,14 +66,14 @@ export const styles = StyleSheet.create({
         marginLeft: 8,
         fontSize: 16,
         fontWeight: '700',
-        color: '#1f2937',
+        color: theme.text,
         flex: 1,
     },
     badge: {
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 12,
-        backgroundColor: '#eef2ff',
+        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#eef2ff',
     },
     badgeText: {
         fontSize: 12,
@@ -87,7 +102,7 @@ export const styles = StyleSheet.create({
     },
     cardDate: {
         fontSize: 12,
-        color: '#6b7280',
+        color: theme.textSecondary,
         marginTop: 2,
     },
     holidayBadge: {
@@ -112,13 +127,13 @@ export const styles = StyleSheet.create({
     holidayTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#1f2937',
+        color: theme.text,
         marginBottom: 8,
         textAlign: 'center',
     },
     holidayText: {
         fontSize: 14,
-        color: '#6b7280',
+        color: theme.textSecondary,
         fontStyle: 'italic',
     },
     weekOffContainer: {
@@ -129,13 +144,13 @@ export const styles = StyleSheet.create({
     weekOffTitle: {
         fontSize: 20,
         fontWeight: '700',
-        color: '#1f2937',
+        color: theme.text,
         marginBottom: 8,
         textAlign: 'center',
     },
     weekOffText: {
         fontSize: 14,
-        color: '#6b7280',
+        color: theme.textSecondary,
         fontStyle: 'italic',
     },
     emptyCard: {
@@ -167,19 +182,19 @@ export const styles = StyleSheet.create({
     },
     timeLabel: {
         fontSize: 12,
-        color: '#6b7280',
+        color: theme.textSecondary,
         fontWeight: '600',
     },
     timeValue: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#1f2937',
+        color: theme.text,
         marginTop: 4,
     },
     timeDivider: {
         width: 1,
         height: '80%',
-        backgroundColor: '#e5e7eb',
+        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#e5e7eb',
         marginHorizontal: 15,
     },
     durationContainer: {
@@ -188,16 +203,59 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: '#e5e7eb',
+        borderTopColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#e5e7eb',
     },
     durationText: {
         marginLeft: 8,
         fontSize: 14,
-        color: '#6b7280',
+        color: theme.textSecondary,
     },
     durationValue: {
         fontSize: 14,
         fontWeight: '700',
-        color: '#1f2937',
+        color: theme.text,
     },
-})
+    dropdownOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'transparent',
+    },
+    dropdownMenu: {
+        position: 'absolute',
+        top: 70,
+        left: 20,
+        width: 240,
+        backgroundColor: theme.cardBg,
+        borderRadius: 16,
+        paddingVertical: 8,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 15,
+        elevation: 10,
+        borderWidth: 1,
+        borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    },
+    dropdownItem: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderLeftWidth: 3,
+        borderLeftColor: 'transparent',
+    },
+    activeDropdownItem: {
+        backgroundColor: COLORS.primary + '10',
+        borderLeftColor: COLORS.primary,
+    },
+    dropdownItemText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: theme.text,
+    },
+    activeDropdownItemText: {
+        color: COLORS.primary,
+        fontWeight: '700',
+    },
+});

@@ -1,20 +1,26 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector } from "react-redux";
 
-import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { showMessage } from "react-native-flash-message";
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/Feather";
+import MIcon from "react-native-vector-icons/MaterialIcons";
+import LinearGradient from 'react-native-linear-gradient';
 
-import { styles } from '../Leaves.styles';
+import { createStyles } from '../Leaves.styles';
 import { ROUTES } from '../../../../navigation/routes';
 import { COLORS } from '../../../../theme/colors';
+import { useAppTheme } from '../../../../theme/useAppTheme';
 
 import { selectUser } from "../../../../redux/selector";
 
 import { getLeaveHistory } from '../../../../services/leavesServices';
+import { AppliedCardSkeleton } from "../../../../components/Skeleton/LeaveSkeleton";
 
 const LeaveHistory = () => {
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
     const [leaves, setLeaves] = useState<any[]>([]);
 
@@ -168,23 +174,50 @@ const LeaveHistory = () => {
         );
     };
 
-    if (loading) {
-        return (
-            <View style={[styles.leaveHistorycontainer, { justifyContent: 'center' }]}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-        );
-    }
 
     return (
         <View style={styles.leaveHistorycontainer}>
-            <FlatList
-                data={leaves}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => renderItem(item)}
-                ListEmptyComponent={<Text style={styles.noDataText}>No leaves found</Text>}
-                contentContainerStyle={{ paddingBottom: 20 }}
-            />
+            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+            <View style={styles.screenHeader}>
+                <LinearGradient
+                    colors={[COLORS.primary, COLORS.primaryDark]}
+                    style={styles.headerGradient}
+                >
+                    <View style={styles.headerContent}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={styles.headerBackButton}
+                        >
+                            <MIcon name="arrow-back" size={24} color="#FFF" />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>Leave History</Text>
+                    </View>
+                </LinearGradient>
+            </View>
+
+            {loading ? (
+                <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    renderItem={() => <AppliedCardSkeleton />}
+                    keyExtractor={(item) => item.toString()}
+                    contentContainerStyle={[styles.scrollContent, { paddingHorizontal: 16 }]}
+                />
+            ) : leaves.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Icon name="calendar" size={60} color={theme.textSecondary || "#9CA3AF"} />
+                    <Text style={styles.emptyText}>No leave history found</Text>
+                    <Text style={styles.emptySubText}>When you apply for leaves, they will appear here.</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={leaves}
+                    renderItem={({ item }) => renderItem(item)}
+                    keyExtractor={(item) => item._id}
+                    contentContainerStyle={[styles.scrollContent, { paddingHorizontal: 16 }]}
+                    showsVerticalScrollIndicator={false}
+                />
+            )}
         </View>
     );
 };

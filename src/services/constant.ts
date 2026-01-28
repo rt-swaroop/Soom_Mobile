@@ -8,6 +8,8 @@ const API_ROUTES = {
     LEAVES: `${BASE_URL}/leaves`,
     SHIFTS: `${BASE_URL}/shift`,
     TIMEOFF: `${BASE_URL}/timeoff`,
+    NOTIFICATIONS: `${BASE_URL}/notifications`,
+    APP_VERSION: `${BASE_URL}/app-version`,
 };
 
 export default API_ROUTES;

@@ -1,7 +1,10 @@
-import React from "react";
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from "react-native";
+import React, { useMemo } from "react";
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Dimensions } from "react-native";
 import Modal from "react-native-modal";
 import Ionicons from "react-native-vector-icons/Ionicons";
+
+import { useAppTheme } from "../../theme/useAppTheme";
+import { COLORS } from "../../theme/colors";
 
 type Service = {
     id: string;
@@ -15,11 +18,11 @@ type MoreOptionsModalProps = {
     onSelect: (option: string) => void;
 };
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('screen');
+
 const servicesData: Service[] = [
-    { id: "1", label: "Daily Report", icon: "clipboard-outline" },
-    { id: "2", label: "Shifts", icon: "time-outline" },
-    { id: "3", label: "Leaves", icon: "calendar-clear-outline" },
-    { id: "4", label: "Time-Off", icon: "alarm-outline" },
+    { id: "1", label: "Shifts", icon: "time-outline" },
+    { id: "2", label: "Time-Off", icon: "alarm-outline" },
     // { id: "4", label: "To-do", icon: "checkbox-outline" },
     // { id: "5", label: "Projects", icon: "briefcase-outline" },
     // { id: "6", label: "Tasks", icon: "clipboard-outline" },
@@ -33,6 +36,9 @@ const servicesData: Service[] = [
 ];
 
 const MoreOptionsModal: React.FC<MoreOptionsModalProps> = ({ visible, onClose, onSelect }) => {
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const renderItem = ({ item }: { item: Service }) => (
         <TouchableOpacity
             style={styles.itemContainer}
@@ -42,7 +48,7 @@ const MoreOptionsModal: React.FC<MoreOptionsModalProps> = ({ visible, onClose, o
             }}
         >
             <View style={styles.iconWrapper}>
-                <Ionicons name={item.icon} size={32} color="#4a90e2" />
+                <Ionicons name={item.icon} size={32} color={theme.text === '#FFFFFF' ? '#FFFFFF' : COLORS.primary} />
             </View>
             <Text style={styles.itemLabel} numberOfLines={1}>
                 {item.label}
@@ -53,10 +59,16 @@ const MoreOptionsModal: React.FC<MoreOptionsModalProps> = ({ visible, onClose, o
     return (
         <Modal
             isVisible={visible}
+            onBackdropPress={onClose}
             onSwipeComplete={onClose}
             swipeDirection="down"
             propagateSwipe
             style={styles.modal}
+            useNativeDriver={true}
+            hideModalContentWhileAnimating={true}
+            statusBarTranslucent={true}
+            deviceHeight={SCREEN_HEIGHT}
+            coverScreen={true}
         >
             <View style={styles.container}>
                 <View style={styles.handle} />
@@ -76,13 +88,13 @@ const MoreOptionsModal: React.FC<MoreOptionsModalProps> = ({ visible, onClose, o
 
 export default MoreOptionsModal;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
     modal: {
         justifyContent: "flex-end",
         margin: 0,
     },
     container: {
-        backgroundColor: "white",
+        backgroundColor: theme.text === '#FFFFFF' ? '#1F2937' : '#FFFFFF',
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -92,7 +104,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 5,
         borderRadius: 3,
-        backgroundColor: "#ccc",
+        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.2)' : '#ccc',
         alignSelf: "center",
         marginBottom: 10,
     },
@@ -104,7 +116,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     iconWrapper: {
-        backgroundColor: "#f5f5f5",
+        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#f5f5f5',
         borderRadius: 16,
         width: 70,
         height: 70,
@@ -116,5 +128,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
         textAlign: "center",
+        color: theme.text,
     },
 });

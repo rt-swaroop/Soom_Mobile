@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import { View, FlatList, Text, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
+import { View, FlatList, Text, TouchableOpacity, RefreshControl, Modal, TouchableWithoutFeedback } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { showMessage } from "react-native-flash-message";
 import { useFocusEffect } from "@react-navigation/native";
@@ -9,114 +9,119 @@ import { useFocusEffect } from "@react-navigation/native";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek";
 
-import { styles } from "./Attendance.styles";
 import AttendanceCard from "./components/AttendanceCard";
+import CustomDateRangePicker from "../../../components/CustomDateRangePicker/CustomDateRangePicker";
+import AttendanceCardSkeleton from "../../../components/Skeleton/AttendanceCardSkeleton";
 
 import { selectUser } from "../../../redux/selector";
+import { createStyles } from "./Attendance.styles";
+import { useAppTheme } from "../../../theme/useAppTheme";
 import { getAttendance } from "../../../services/attendanceServices";
 
 dayjs.extend(isoWeek);
 
 const AttendanceScreen = () => {
-    const [currentWeek, setCurrentWeek] = useState(dayjs());
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
+    const [startDate, setStartDate] = useState(dayjs().startOf("isoWeek"));
+    const [endDate, setEndDate] = useState(dayjs().endOf("isoWeek"));
+    const [showPicker, setShowPicker] = useState(false);
+    const [showWeekDropdown, setShowWeekDropdown] = useState(false);
+
     const [attendanceData, setAttendanceData] = useState<{ attendanceDate: string;[key: string]: any }[]>([]);
     const [publicHolidays, setPublicHolidays] = useState<{ _id: string; title: string; date: string; type: string }[]>([]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const user = useSelector(selectUser);
 
-    const weekStart = currentWeek.startOf("isoWeek");
-    const weekEnd = currentWeek.endOf("isoWeek");
+    const pastWeeks = useMemo(() => {
+        const weeks = [];
+        for (let i = 0; i < 5; i++) {
+            const start = dayjs().subtract(i, 'week').startOf('isoWeek');
+            const end = dayjs().subtract(i, 'week').endOf('isoWeek');
+            weeks.push({
+                label: i === 0 ? "Current Week" : `Last ${i} Week${i > 1 ? 's' : ''}`,
+                range: `${start.format("MMM DD")} - ${end.format("MMM DD")}`,
+                start,
+                end
+            });
+        }
+        return weeks;
+    }, []);
 
-    const weekDays = useMemo(() => {
-        return Array.from({ length: 7 }, (_, i) => weekStart.add(i, "day"));
-    }, [weekStart]);
-
-    const fetchUserAttendance = async () => {
+    const fetchUserAttendance = useCallback(async () => {
         setLoading(true);
-
         try {
             const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
             const response = await getAttendance({
                 userId: user?._id || "",
                 subscriberId: user?.companyId?._id || "",
-                startDate: weekStart.format("YYYY-MM-DD"),
-                endDate: weekEnd.format("YYYY-MM-DD"),
+                startDate: startDate.format("YYYY-MM-DD"),
+                endDate: endDate.format("YYYY-MM-DD"),
                 timeZone
             });
 
             if (response?.success) {
                 setAttendanceData(response?.attendance || []);
                 setPublicHolidays(response?.publicHolidays || []);
-            } else {
-                showMessage({
-                    message: "No attendance records found",
-                    type: "info",
-                    duration: 3000,
-                });
             }
-
         } catch (error) {
+            console.error(error);
             showMessage({
-                message: "Error fetching  attendance data",
-                description: "Unable to retrieve attendance information. Please try again later.",
-                type: "danger",
-                duration: 3000,
+                message: "Error fetching attendance",
+                type: "danger"
             });
         } finally {
             setLoading(false);
         }
-    }
+    }, [user?._id, user?.companyId?._id, startDate, endDate]);
 
     useFocusEffect(
         useCallback(() => {
             fetchUserAttendance();
-        }, [user?._id])
+        }, [fetchUserAttendance])
     );
 
     useEffect(() => {
         fetchUserAttendance();
-    }, [currentWeek, user?._id]);
+    }, [fetchUserAttendance]);
 
     const onRefresh = async () => {
         setRefreshing(true);
-        try {
-            await fetchUserAttendance();
-        } finally {
-            setRefreshing(false);
-        }
+        await fetchUserAttendance();
+        setRefreshing(false);
     };
 
-    const mergedData = weekDays.map((date) => {
+    const handleApplyRange = (start: dayjs.Dayjs, end: dayjs.Dayjs) => {
+        setStartDate(start);
+        setEndDate(end);
+    };
+
+    const handleWeekSelect = (week: any) => {
+        setStartDate(week.start);
+        setEndDate(week.end);
+        setShowWeekDropdown(false);
+    };
+
+    const daysCount = endDate.diff(startDate, 'day') + 1;
+    const dateRange = useMemo(() => {
+        return Array.from({ length: daysCount > 0 ? daysCount : 0 }, (_, i) => startDate.add(i, "day"));
+    }, [startDate, daysCount]);
+
+    const mergedData = dateRange.map((date) => {
         const formattedDate = date.format("YYYY-MM-DD");
-
-        const holiday = publicHolidays.find(
-            (h) => dayjs(h.date).format("YYYY-MM-DD") === formattedDate
-        );
-
-        const existing = attendanceData.find(
-            (item) =>
-                item.clockInTime &&
-                dayjs(item.clockInTime).format("YYYY-MM-DD") === formattedDate
-        );
+        const holiday = publicHolidays.find(h => dayjs(h.date).format("YYYY-MM-DD") === formattedDate);
+        const existing = attendanceData.find(item => item.clockInTime && dayjs(item.clockInTime).format("YYYY-MM-DD") === formattedDate);
 
         if (existing) {
             return {
                 id: existing._id,
                 date: formattedDate,
-                clockIn: existing.clockInTime
-                    ? dayjs(existing.clockInTime).format("hh:mm A")
-                    : "--",
-                clockOut: existing.clockOutTime
-                    ? dayjs(existing.clockOutTime).format("hh:mm A")
-                    : "--",
-                clockInLocation: existing?.clockinLocation
-                    ? { latitude: existing?.clockinLocation?.latitude, longitude: existing?.clockinLocation?.longitude }
-                    : null,
-                clockOutLocation: existing?.clockoutLocation
-                    ? { latitude: existing?.clockoutLocation?.latitude, longitude: existing?.clockoutLocation?.longitude }
-                    : null,
+                clockIn: existing.clockInTime ? dayjs(existing.clockInTime).format("hh:mm A") : "--",
+                clockOut: existing.clockOutTime ? dayjs(existing.clockOutTime).format("hh:mm A") : "--",
+                clockInLocation: existing?.clockinLocation,
+                clockOutLocation: existing?.clockoutLocation,
                 place: existing.place || "--",
                 grossHours: existing.grossHours || "--",
                 arrival: existing.arrival || "--",
@@ -124,64 +129,77 @@ const AttendanceScreen = () => {
                 holidayTitle: holiday?.title || null,
             };
         }
-
-        if (holiday) {
-            return {
-                id: `holiday-${holiday._id}`,
-                date: formattedDate,
-                clockIn: "--",
-                clockOut: "--",
-                clockInLocation: null,
-                clockOutLocation: null,
-                place: "--",
-                grossHours: "--",
-                arrival: "--",
-                isHoliday: true,
-                holidayTitle: holiday.title,
-            };
-        }
-
         return {
             id: formattedDate,
             date: formattedDate,
-            clockIn: "--",
-            clockOut: "--",
-            clockInLocation: null,
-            clockOutLocation: null,
-            place: "--",
-            grossHours: "--",
-            arrival: "--",
-            isHoliday: false,
-            holidayTitle: null,
+            clockIn: "--", clockOut: "--", clockInLocation: null, clockOutLocation: null,
+            place: "--", grossHours: "--", arrival: "--",
+            isHoliday: !!holiday, holidayTitle: holiday?.title || null,
         };
     });
 
+    const isCurrentRange = (start: dayjs.Dayjs, end: dayjs.Dayjs) => {
+        return startDate.isSame(start, 'day') && endDate.isSame(end, 'day');
+    };
+
     return (
         <View style={styles.container}>
-            <View style={styles.weekHeader}>
-                <TouchableOpacity
-                    style={styles.navButton}
-                    onPress={() => setCurrentWeek(prev => prev.subtract(1, "week"))}
-                >
-                    <Icon name="chevron-left" size={24} color="#fff" />
+            <View style={styles.headerRow}>
+                <TouchableOpacity style={styles.weekHeader} onPress={() => setShowWeekDropdown(true)}>
+                    <Text style={styles.weekText}>
+                        {startDate.format("MMM DD")} - {endDate.format("MMM DD")}
+                    </Text>
+                    <Icon name="chevron-down" size={18} color={theme.textSecondary} />
                 </TouchableOpacity>
 
-                <Text style={styles.weekText}>
-                    {weekStart.format("MMM DD")} - {weekEnd.format("MMM DD")}
-                </Text>
-
                 <TouchableOpacity
                     style={styles.navButton}
-                    onPress={() => setCurrentWeek(prev => prev.add(1, "week"))}
+                    onPress={() => setShowPicker(true)}
                 >
-                    <Icon name="chevron-right" size={24} color="#fff" />
+                    <Icon name="calendar-month" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
+            {showWeekDropdown && (
+                <Modal transparent animationType="none">
+                    <TouchableWithoutFeedback onPress={() => setShowWeekDropdown(false)}>
+                        <View style={styles.dropdownOverlay}>
+                            <View style={styles.dropdownMenu}>
+                                {pastWeeks.map((week, idx) => {
+                                    const active = isCurrentRange(week.start, week.end);
+                                    return (
+                                        <TouchableOpacity
+                                            key={idx}
+                                            style={[styles.dropdownItem, active && styles.activeDropdownItem]}
+                                            onPress={() => handleWeekSelect(week)}
+                                        >
+                                            <Text style={[styles.dropdownItemText, active && styles.activeDropdownItemText]}>
+                                                {week.range} ({week.label})
+                                            </Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </Modal>
+            )}
+
+            <CustomDateRangePicker
+                visible={showPicker}
+                onClose={() => setShowPicker(false)}
+                onApply={handleApplyRange}
+                initialStartDate={startDate}
+                initialEndDate={endDate}
+            />
+
             {loading && !refreshing ? (
-                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                    <ActivityIndicator size="large" color="#4c669f" />
-                </View>
+                <FlatList
+                    data={[1, 2, 3]}
+                    keyExtractor={(item) => item.toString()}
+                    renderItem={() => <AttendanceCardSkeleton />}
+                    contentContainerStyle={{ padding: 15 }}
+                />
             ) : (
                 <FlatList
                     data={mergedData}
@@ -193,7 +211,6 @@ const AttendanceScreen = () => {
                     }
                 />
             )}
-
         </View>
     );
 };

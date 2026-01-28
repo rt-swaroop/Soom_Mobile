@@ -40,13 +40,14 @@ export const lightTheme = {
     iconColor: '#2563EB',
     cardShadow: 'rgba(0, 0, 0, 0.15)',
     inputBg: 'rgba(0, 0, 0, 0.05)',
+    cardBg: '#FFFFFF',
 };
 
 export const darkTheme = {
     ...COLORS,
     background: '#111827',
     text: '#FFFFFF',
-    textSecondary: 'rgba(255, 255, 255, 0.8)',
+    textSecondary: '#9CA3AF',
     gradientStart: '#1e3a8a',
     gradientEnd: '#111827',
     glassCardBg: 'transparent',
@@ -56,4 +57,5 @@ export const darkTheme = {
     iconColor: '#FFFFFF',
     cardShadow: 'transparent',
     inputBg: 'rgba(255, 255, 255, 0.05)',
+    cardBg: '#1F2937',
 };

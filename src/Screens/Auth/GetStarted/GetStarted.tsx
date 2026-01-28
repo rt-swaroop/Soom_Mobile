@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo } from "react";
-import { View, Text, TouchableOpacity, Image, Animated, useColorScheme } from "react-native";
+
+import { View, Text, TouchableOpacity, Image, Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -7,15 +8,15 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { createStyles } from './GetStarted.styles';
 import { IMAGES } from "../../../assets/images";
-import { COLORS, lightTheme, darkTheme } from "../../../theme/colors";
+import { COLORS } from "../../../theme/colors";
 import { ROUTES } from "../../../navigation/routes";
 import { RootStackParamList } from "../../../navigation/AppNavigator";
+import { useAppTheme } from "../../../theme/useAppTheme";
 
 const GetStartedScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-    const scheme = useColorScheme();
-    const theme = scheme === 'dark' ? darkTheme : lightTheme;
+    const { theme } = useAppTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { View, Text, ActivityIndicator } from 'react-native';
@@ -8,11 +8,14 @@ import IconMC from 'react-native-vector-icons/MaterialCommunityIcons';
 import { showMessage } from 'react-native-flash-message';
 import LinearGradient from 'react-native-linear-gradient';
 
+import ShiftSkeleton from '../../../../components/Skeleton/ShiftSkeleton';
+
 import dayjs from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 dayjs.extend(isoWeek);
 
-import { styles } from '../Home.styles';
+import { createStyles } from '../Home.styles';
+import { useAppTheme } from '../../../../theme/useAppTheme';
 import { COLORS } from '../../../../theme/colors';
 
 import { selectUser } from '../../../../redux/selector';
@@ -32,6 +35,9 @@ const formatTime = (time?: string) => {
 type ShiftCardProps = { refreshKey?: number };
 
 const ShiftCard = ({ refreshKey }: ShiftCardProps) => {
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [shiftData, setShiftData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
@@ -94,11 +100,7 @@ const ShiftCard = ({ refreshKey }: ShiftCardProps) => {
     }
 
     if (loading) {
-        return (
-            <View style={[styles.shiftCard, { alignItems: 'center', justifyContent: 'center' }]}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-        );
+        return <ShiftSkeleton />;
     }
 
     if (!shiftData) {
@@ -145,7 +147,7 @@ const ShiftCard = ({ refreshKey }: ShiftCardProps) => {
                 </LinearGradient>
                 <View style={{ padding: 16, alignItems: 'center' }}>
                     <IconMC name="party-popper" size={40} color="#FF6B6B" />
-                    <Text style={{ color: COLORS.gray, fontSize: 14, marginTop: 8, fontStyle: 'italic' }}>
+                    <Text style={{ color: theme.textSecondary || COLORS.gray, fontSize: 14, marginTop: 8, fontStyle: 'italic' }}>
                         No shift scheduled
                     </Text>
                 </View>
@@ -179,7 +181,7 @@ const ShiftCard = ({ refreshKey }: ShiftCardProps) => {
                 </LinearGradient>
                 <View style={{ padding: 16, alignItems: 'center' }}>
                     <IconMC name="calendar-blank" size={40} color="#9CA3AF" />
-                    <Text style={{ color: COLORS.gray, fontSize: 14, marginTop: 8, fontStyle: 'italic' }}>
+                    <Text style={{ color: theme.textSecondary || COLORS.gray, fontSize: 14, marginTop: 8, fontStyle: 'italic' }}>
                         No shift scheduled
                     </Text>
                 </View>

@@ -1,11 +1,9 @@
 import API_ROUTES from './constant'
 import api from '../config/api';
 
-export const getLeaveBalance = async ({ userId, year }: { userId: string; year: number }) => {
+export const getLeaveBalance = async (userId: string) => {
     try {
-        const response = await api.get(`${API_ROUTES.LEAVES}/get-leave-balance/${userId}`, {
-            params: { year },
-        });
+        const response = await api.get(`${API_ROUTES.LEAVES}/get-leave-balance/${userId}`);
         return response.data;
     } catch (err: any) {
         throw err.response?.data || err.message;

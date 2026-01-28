@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import IconMC from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -6,7 +7,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import dayjs from 'dayjs';
 
 import { COLORS } from '../../../../theme/colors';
-import { styles } from '../Shifts.styles';
+import { createStyles } from '../Shifts.styles';
+import { useAppTheme } from '../../../../theme/useAppTheme';
 
 type ShiftData = {
     _id: string;
@@ -55,6 +57,9 @@ const formatTime = (time?: string) => {
 };
 
 const ShiftCard: React.FC<ShiftCardProps> = ({ date, dayName, shift, holiday }) => {
+    const { theme } = useAppTheme();
+    const styles = React.useMemo(() => createStyles(theme), [theme]);
+
     if (shift?.isPublicHoliday || holiday) {
         const holidayTitle = typeof shift?.holidayData === 'object' && shift?.holidayData?.title
             ? shift.holidayData.title

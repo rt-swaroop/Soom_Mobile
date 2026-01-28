@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Text, View, TextInput, TouchableOpacity, Platform, ActivityIndicator, StatusBar } from 'react-native'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
+import LinearGradient from 'react-native-linear-gradient';
 import { showMessage } from 'react-native-flash-message';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 
-import { styles } from '../DailyReports.styles'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
+import { createStyles } from '../DailyReports.styles'
 import { COLORS } from '../../../../theme/colors'
+import { useAppTheme } from '../../../../theme/useAppTheme';
 
 import Dropdown from "../../../../components/Dropdown";
-import DatePickerInput from "../../../../components/DatePickerInput";
-
 import { selectUser } from '../../../../redux/selector';
 
 import { submitDailyReport } from '../../../../services/dailyReportsServices'
@@ -45,12 +48,13 @@ type SubmitDailyReportParams = {
 type SubmitDailyReportRouteProp = RouteProp<Record<string, SubmitDailyReportParams>, string>;
 
 const SubmitDailyReport = () => {
-    const [tasks, setTasks] = useState<TaskInput[]>([{ ...defaultTask }]);
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
+    const [tasks, setTasks] = useState<TaskInput[]>([{ ...defaultTask }]);
     const [loading, setLoading] = useState(false);
 
     const user = useSelector(selectUser);
-
     const navigation = useNavigation();
     const route = useRoute<SubmitDailyReportRouteProp>();
 
@@ -78,21 +82,24 @@ const SubmitDailyReport = () => {
     const removeTask = (index: number) => setTasks(prev => prev.filter((_, i) => i !== index))
 
     const handleSubmit = async () => {
-
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
         setLoading(true);
 
         try {
+            const hasInvalid = tasks.some(t => {
+                const isCompanyEmpty = !t.company || t.company.trim() === '';
+                const isDescriptionEmpty = !t.description || t.description.trim() === '';
+                const isStatusEmpty = !t.status || t.status.trim() === '';
+                const isTimeEmpty = (t.hours === '' && t.minutes === '') || (t.hours === '0' && t.minutes === '0');
 
-            const hasInvalid = tasks.some(t => !t.company || !t.description || !t.status || (t.hours === '' && t.minutes === ''))
+                return isCompanyEmpty || isDescriptionEmpty || isStatusEmpty || isTimeEmpty;
+            });
 
             if (hasInvalid) {
                 showMessage({
-                    message: "Validation Error",
-                    description: "Please fill all required fields for each task.",
+                    message: "Missing Information",
+                    description: "All fields are required. Please ensure each task has a company, description, status, and duration.",
                     type: "warning",
-                    duration: 3000,
                 });
                 setLoading(false);
                 return;
@@ -114,80 +121,94 @@ const SubmitDailyReport = () => {
             await submitDailyReport(submitData, user?._id, timezone)
 
             showMessage({
-                message: isEditMode ? "Daily Report Updated" : "Daily Report Submitted",
-                description: isEditMode
-                    ? `Your Daily Report has been updated successfully.`
-                    : `Your Daily Report has been submitted.`,
+                message: isEditMode ? "Report Updated" : "Report Submitted",
                 type: "success",
-                duration: 3000,
             });
-
+            navigation.goBack();
         } catch (error) {
             console.error('Error submitting daily report:', error);
             showMessage({
                 message: "Submission Failed",
-                description: "Something went wrong. Please try again.",
                 type: "danger",
-                duration: 4000,
             });
         } finally {
             setLoading(false);
-            navigation.goBack();
         }
     }
 
     return (
-        <KeyboardAvoidingWidget>
-            <ScrollView
+        <View style={styles.mainContainer}>
+            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+            <View style={styles.screenHeader}>
+                <LinearGradient
+                    colors={[COLORS.primary, COLORS.primaryDark]}
+                    style={styles.headerGradient}
+                >
+                    <View style={styles.headerContent}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={styles.headerBackButton}
+                        >
+                            <MIcon name="arrow-back" size={24} color="#FFF" />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>
+                            {isEditMode ? 'Edit Daily Report' : 'Submit Daily Report'}
+                        </Text>
+                    </View>
+                </LinearGradient>
+            </View>
+
+            <KeyboardAwareScrollView
                 style={styles.container}
-                contentContainerStyle={{ paddingBottom: 120 }}
+                contentContainerStyle={{ paddingBottom: 150, paddingTop: 130 }}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
-                keyboardDismissMode="on-drag"
+                enableOnAndroid={true}
+                extraScrollHeight={100}
+                enableAutomaticScroll={Platform.OS === 'ios'}
             >
-                <View style={{ marginTop: 8 }}>
+                <View>
                     {tasks.map((task, index) => (
                         <View key={index} style={styles.taskCard}>
                             <View style={styles.taskCardHeader}>
                                 <Text style={styles.taskCardTitle}>Task {index + 1}</Text>
                                 {tasks.length > 1 && (
                                     <TouchableOpacity onPress={() => removeTask(index)}>
-                                        <Icon name="delete-outline" size={24} color={COLORS.red1} />
+                                        <Icon name="trash-can-outline" size={24} color={COLORS.red1} />
                                     </TouchableOpacity>
                                 )}
                             </View>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Company</Text>
+                                <Text style={styles.label}>Company<Text style={{ color: COLORS.red1 }}> *</Text></Text>
                                 <TextInput
-                                    placeholder="Enter company"
-                                    placeholderTextColor={COLORS.gray2}
+                                    placeholder="Enter company name"
+                                    placeholderTextColor={theme.textSecondary + '80'}
                                     style={styles.input}
                                     value={task.company}
                                     onChangeText={v => updateTask(index, 'company', v)}
-                                    returnKeyType="next"
                                 />
                             </View>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Task Description</Text>
+                                <Text style={styles.label}>Task Description<Text style={{ color: COLORS.red1 }}> *</Text></Text>
                                 <TextInput
-                                    placeholder="Describe the task"
-                                    placeholderTextColor={COLORS.gray2}
+                                    placeholder="What did you work on?"
+                                    placeholderTextColor={theme.textSecondary + '80'}
                                     style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
                                     value={task.description}
                                     onChangeText={v => updateTask(index, 'description', v)}
                                     multiline
-                                    returnKeyType="done"
                                 />
                             </View>
 
                             <View style={styles.inlineGroup}>
-                                <View style={[styles.formGroup, { flex: 1, marginRight: 8 }]}>
-                                    <Text style={styles.label}>Hours</Text>
+                                <View style={[styles.formGroup, { flex: 1 }]}>
+                                    <Text style={styles.label}>Hours<Text style={{ color: COLORS.red1 }}> *</Text></Text>
                                     <TextInput
                                         placeholder="0"
-                                        placeholderTextColor={COLORS.gray2}
+                                        placeholderTextColor={theme.textSecondary + '80'}
                                         style={styles.input}
                                         value={task.hours}
                                         onChangeText={v => updateTask(index, 'hours', v.replace(/[^0-9]/g, ''))}
@@ -195,11 +216,11 @@ const SubmitDailyReport = () => {
                                         maxLength={2}
                                     />
                                 </View>
-                                <View style={[styles.formGroup, { flex: 1, marginLeft: 8 }]}>
-                                    <Text style={styles.label}>Minutes</Text>
+                                <View style={[styles.formGroup, { flex: 1 }]}>
+                                    <Text style={styles.label}>Minutes<Text style={{ color: COLORS.red1 }}> *</Text></Text>
                                     <TextInput
                                         placeholder="0"
-                                        placeholderTextColor={COLORS.gray2}
+                                        placeholderTextColor={theme.textSecondary + '80'}
                                         style={styles.input}
                                         value={task.minutes}
                                         onChangeText={v => {
@@ -214,11 +235,13 @@ const SubmitDailyReport = () => {
                             </View>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Status</Text>
+                                <Text style={styles.label}>Status<Text style={{ color: COLORS.red1 }}> *</Text></Text>
                                 <Dropdown
                                     label=""
                                     value={task.status}
                                     items={statusOptions}
+                                    title="Select Status"
+                                    message="Update the current progress of this task."
                                     placeholder="Select status"
                                     onSelect={(v) => updateTask(index, 'status', v)}
                                 />
@@ -227,11 +250,11 @@ const SubmitDailyReport = () => {
                     ))}
 
                     <TouchableOpacity style={styles.addTaskButton} onPress={addTask}>
-                        <Icon name="add-circle-outline" size={22} color={COLORS.white} />
-                        <Text style={styles.addTaskButtonText}>Add another task</Text>
+                        <Icon name="plus-circle-outline" size={22} color={COLORS.primary} />
+                        <Text style={styles.addTaskButtonText}>Add Another Task</Text>
                     </TouchableOpacity>
                 </View>
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             <View style={styles.fixedButtonContainer}>
                 <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={loading}>
@@ -239,23 +262,13 @@ const SubmitDailyReport = () => {
                         <ActivityIndicator size="small" color="#fff" />
                     ) : (
                         <Text style={styles.submitButtonText}>
-                            {isEditMode ? 'Update Daily Report' : 'Submit Daily Report'}
+                            {isEditMode ? 'UPDATE REPORT' : 'SUBMIT REPORT'}
                         </Text>
                     )}
                 </TouchableOpacity>
             </View>
-        </KeyboardAvoidingWidget>
+        </View>
     )
 }
-
-const KeyboardAvoidingWidget = ({ children }: { children: React.ReactNode }) => (
-    <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-        {children}
-    </KeyboardAvoidingView>
-)
 
 export default SubmitDailyReport

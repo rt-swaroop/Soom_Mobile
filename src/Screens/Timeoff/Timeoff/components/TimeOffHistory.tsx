@@ -1,23 +1,29 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useSelector } from "react-redux";
-
-import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { showMessage } from "react-native-flash-message";
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/Feather";
+import MIcon from "react-native-vector-icons/MaterialIcons";
+import LinearGradient from 'react-native-linear-gradient';
 
-import { styles } from '../Timeoff.styles';
+import { createStyles } from '../Timeoff.styles';
 import { ROUTES } from '../../../../navigation/routes';
 import { COLORS } from '../../../../theme/colors';
+import { useAppTheme } from '../../../../theme/useAppTheme';
 
 import { selectUser } from "../../../../redux/selector";
-
 import { getTimeoffHistory } from '../../../../services/timeoffServices';
+import { AppliedCardSkeleton } from "../../../../components/Skeleton/LeaveSkeleton";
 
 const TimeOffHistory = () => {
+    const { theme } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+
     const [timeOffs, setTimeOffs] = useState<any[]>([]);
 
     const [loading, setLoading] = useState(false);
+
 
     const user = useSelector(selectUser);
 
@@ -176,25 +182,53 @@ const TimeOffHistory = () => {
         )
     }
 
-    if (loading) {
-        return (
-            <View style={[styles.timeoffHistorycontainer, { justifyContent: 'center' }]}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-            </View>
-        );
-    }
-
     return (
         <View style={styles.timeoffHistorycontainer}>
-            <FlatList
-                data={timeOffs}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => renderItem(item)}
-                ListEmptyComponent={<Text style={styles.noDataText}>No time-offs found</Text>}
-                contentContainerStyle={{ paddingBottom: 20 }}
-            />
-        </View>
-    )
-}
+            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+            <View style={styles.screenHeader}>
+                <LinearGradient
+                    colors={[COLORS.primary, COLORS.primaryDark]}
+                    style={styles.headerGradient}
+                >
+                    <View style={styles.headerContent}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={styles.headerBackButton}
+                        >
+                            <MIcon name="arrow-back" size={24} color="#FFF" />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>Time-off History</Text>
+                    </View>
+                </LinearGradient>
+            </View>
+
+            {loading ? (
+                <FlatList
+                    data={[1, 2, 3, 4, 5]}
+                    renderItem={() => <AppliedCardSkeleton />}
+                    keyExtractor={(item) => item.toString()}
+                    contentContainerStyle={{ ...styles.scrollContent, paddingHorizontal: 16 }}
+                    showsVerticalScrollIndicator={false}
+                />
+            ) : timeOffs.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Icon name="calendar" size={60} color={theme.textSecondary || "#9CA3AF"} />
+                    <Text style={styles.emptyText}>No time-off history found</Text>
+                    <Text style={styles.emptySubText}>When you apply for time-off, they will appear here.</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={timeOffs}
+                    renderItem={({ item }) => renderItem(item)}
+                    keyExtractor={(item) => item._id}
+                    contentContainerStyle={[styles.scrollContent, { paddingHorizontal: 16 }]}
+                    showsVerticalScrollIndicator={false}
+                />
+            )
+            }
+        </View >
+    );
+};
 
 export default TimeOffHistory

@@ -1,6 +1,9 @@
 export const ROUTES = {
     GET_STARTED: 'GetStarted',
+    LAUNCHER: 'Launcher',
+    UPDATE_REQUIRED: 'UpdateRequired',
     LOGIN: 'Login',
+    ROLE_SELECTION: 'RoleSelection',
 
     HOME: 'Home',
 
@@ -16,8 +19,13 @@ export const ROUTES = {
     DAILYREPORTS: 'DailyReports',
     SUBMITDAILYREPORT: 'SubmitDailyReport',
 
-    ROLE_SELECTION: 'RoleSelection',
     SHIFTS: 'Shifts',
+
+    PROFILE: 'Profile',
+    PROFILE_DETAILS: 'ProfileDetails',
+    NOTIFICATIONS: 'Notifications',
+    NOTIFICATION_PREFERENCES: 'NotificationPreferences',
+    PERMISSION_MANAGER: 'PermissionManager',
 } as const
 
 export type RouteName = typeof ROUTES[keyof typeof ROUTES];

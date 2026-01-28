@@ -1,32 +1,34 @@
 import { StyleSheet } from "react-native";
 import { COLORS } from "../../../theme/colors";
 
-export const styles = StyleSheet.create({
+export const createStyles = (theme: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.background,
         padding: 20
     },
     attendanceCard: {
         marginTop: 10,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.cardBg,
         padding: 20,
-        borderRadius: 15,
+        borderRadius: 20,
         alignItems: 'center',
-        shadowColor: COLORS.black,
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
-        elevation: 5
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+        borderWidth: 0.5,
+        borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
     },
     timeText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: COLORS.primary
+        color: theme.text
     },
     dateText: {
         fontSize: 16,
-        color: COLORS.darkGray,
+        color: theme.textSecondary,
         marginVertical: 10
     },
     attendanceButtonContainer: {
@@ -36,7 +38,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginVertical: 5,
-        shadowColor: COLORS.black,
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -62,16 +64,17 @@ export const styles = StyleSheet.create({
     locationText: {
         marginLeft: 1,
         fontSize: 16,
-        color: COLORS.darkGray,
+        color: theme.textSecondary,
         textAlign: 'center',
     },
     dashedLine: {
         width: '100%',
         height: 1,
         borderBottomWidth: 1,
-        borderBottomColor: COLORS.darkGray,
+        borderBottomColor: theme.textSecondary,
         borderStyle: 'dashed',
-        marginVertical: 5
+        marginVertical: 5,
+        opacity: 0.3
     },
     summaryContainer: {
         flexDirection: 'row',
@@ -85,25 +88,27 @@ export const styles = StyleSheet.create({
     actionLabel: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: COLORS.primaryDark,
+        color: theme.text,
         marginTop: 5,
         textTransform: 'uppercase',
     },
     actionText: {
         fontSize: 14,
-        color: COLORS.darkGray,
+        color: theme.textSecondary,
         marginTop: 5,
     },
     shiftCard: {
         marginTop: 16,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.cardBg,
         padding: 16,
         borderRadius: 12,
-        shadowColor: COLORS.black,
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        elevation: 3
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+        borderWidth: 0.5,
+        borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
     },
     shiftHeader: {
         flexDirection: 'row',
@@ -116,13 +121,13 @@ export const styles = StyleSheet.create({
         marginLeft: 8,
         fontSize: 16,
         fontWeight: '700',
-        color: COLORS.primaryDark
+        color: theme.text
     },
     shiftBadge: {
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 20,
-        backgroundColor: '#eef3ff'
+        backgroundColor: theme.inputBg
     },
     shiftBadgeText: {
         fontSize: 12,
@@ -143,12 +148,12 @@ export const styles = StyleSheet.create({
     },
     shiftLabel: {
         fontSize: 12,
-        color: COLORS.darkGray
+        color: theme.textSecondary
     },
     shiftValue: {
         marginTop: 2,
         fontSize: 16,
         fontWeight: '700',
-        color: COLORS.primaryDark
+        color: theme.text
     }
 });

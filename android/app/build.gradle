@@ -20,8 +20,8 @@ android {
         applicationId "com.soom_mobile"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "1.6"
+        versionCode 8
+        versionName "2.0"
     }
 
     signingConfigs {
@@ -61,3 +61,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+apply plugin: "com.google.gms.google-services"

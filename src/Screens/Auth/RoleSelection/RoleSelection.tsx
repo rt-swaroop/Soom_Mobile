@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { useDispatch } from "react-redux";
 
 import { View, Text, TouchableOpacity, SafeAreaView, Animated, StatusBar } from "react-native";
@@ -6,18 +6,22 @@ import { useNavigation, CommonActions } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { showMessage } from "react-native-flash-message";
 
-import { styles } from "./RoleSelection.styles";
+import { createStyles } from "./RoleSelection.styles";
 import { COLORS } from "../../../theme/colors";
 import { ROUTES } from "../../../navigation/routes";
 import { RootStackParamList } from "../../../navigation/AppNavigator";
+
 import { logoutUser } from "../../../redux/reducers/authReducer";
+import { useAppTheme } from "../../../theme/useAppTheme";
 
 const RoleSelectionScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const dispatch = useDispatch();
+    const { theme, isDark } = useAppTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
 
-    // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
 
@@ -37,6 +41,17 @@ const RoleSelectionScreen = () => {
     }, []);
 
     const handleRoleSelect = (roleType: 'admin' | 'user') => {
+        if (roleType === 'admin') {
+            showMessage({
+                message: "Coming Soon",
+                description: "The Company Admin module is currently under development.",
+                type: "info",
+                icon: "info",
+                backgroundColor: COLORS.primary,
+            });
+            return;
+        }
+
         navigation.dispatch(
             CommonActions.reset({
                 index: 0,
@@ -56,8 +71,8 @@ const RoleSelectionScreen = () => {
     };
 
     return (
-        <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.container}>
-            <StatusBar barStyle="light-content" />
+        <LinearGradient colors={[theme.gradientStart, theme.gradientEnd]} style={styles.container}>
+            <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
             <View style={styles.backgroundDecoration} />
             <View style={styles.backgroundDecorationBottom} />
 
@@ -65,7 +80,7 @@ const RoleSelectionScreen = () => {
                 <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <View style={styles.headerSection}>
                         <View style={styles.iconCircle}>
-                            <Icon name="supervisor-account" size={50} color={COLORS.white} />
+                            <Icon name="supervisor-account" size={50} color={theme.text} />
                         </View>
                         <Text style={styles.title}>Explore as...</Text>
                         <Text style={styles.subtitle}>
@@ -75,44 +90,58 @@ const RoleSelectionScreen = () => {
 
                     <View style={styles.selectionContainer}>
                         <TouchableOpacity
-                            style={[styles.card, styles.adminAccent]}
                             onPress={() => handleRoleSelect('admin')}
                             activeOpacity={0.85}
+                            style={{ width: '100%' }}
                         >
-                            <View style={styles.iconWrapper}>
-                                <Icon name="admin-panel-settings" size={34} color="#0288D1" />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Text style={styles.cardTitle}>Admin Workspace</Text>
-                                <Text style={styles.cardDescription}>Oversee operations, track attendance, and generate reports.</Text>
-                            </View>
-                            <View style={styles.goIconWrapper}>
-                                <Icon name="arrow-forward" size={20} color="#64748B" />
-                            </View>
+                            <LinearGradient
+                                colors={theme.glassCardGradient}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.card}
+                            >
+                                <View style={styles.iconWrapper}>
+                                    <Icon name="admin-panel-settings" size={30} color={COLORS.primary} />
+                                </View>
+                                <View style={styles.cardContent}>
+                                    <Text style={styles.cardTitle}>Company Admin</Text>
+                                    <Text style={styles.cardDescription}>Oversee operations, track attendance, and generate reports.</Text>
+                                </View>
+                                <View style={styles.goIconWrapper}>
+                                    <Icon name="arrow-forward" size={20} color={theme.textSecondary} />
+                                </View>
+                            </LinearGradient>
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.card, styles.userAccent]}
                             onPress={() => handleRoleSelect('user')}
                             activeOpacity={0.85}
+                            style={{ width: '100%' }}
                         >
-                            <View style={styles.iconWrapper}>
-                                <Icon name="person-outline" size={34} color="#388E3C" />
-                            </View>
-                            <View style={styles.cardContent}>
-                                <Text style={styles.cardTitle}>Personal Workspace</Text>
-                                <Text style={styles.cardDescription}>Log your attendance, view shifts, and manage leave requests.</Text>
-                            </View>
-                            <View style={styles.goIconWrapper}>
-                                <Icon name="arrow-forward" size={20} color="#64748B" />
-                            </View>
+                            <LinearGradient
+                                colors={theme.glassCardGradient}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.card}
+                            >
+                                <View style={styles.iconWrapper}>
+                                    <Icon name="person-outline" size={30} color={COLORS.green1} />
+                                </View>
+                                <View style={styles.cardContent}>
+                                    <Text style={styles.cardTitle}>Employee Portal</Text>
+                                    <Text style={styles.cardDescription}>Log your attendance, view shifts, and manage leave requests.</Text>
+                                </View>
+                                <View style={styles.goIconWrapper}>
+                                    <Icon name="arrow-forward" size={20} color={theme.textSecondary} />
+                                </View>
+                            </LinearGradient>
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
 
                 <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
                     <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
-                        <Icon name="power-settings-new" size={20} color={COLORS.white} />
+                        <Icon name="power-settings-new" size={20} color={theme.text} />
                         <Text style={styles.logoutBtnText}>Switch Account</Text>
                     </TouchableOpacity>
                 </Animated.View>
