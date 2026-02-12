@@ -35,7 +35,7 @@ export const lightTheme = {
     gradientEnd: '#dbeafe',
     glassCardBg: 'rgba(255,255,255,0.6)',
     glassCardGradient: ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)'],
-    glassCardBorder: 'rgba(255,255,255,0.6)',
+    glassCardBorder: 'rgba(0,0,0,0.08)',
     decoration: 'rgba(37, 99, 235, 0.15)',
     iconColor: '#2563EB',
     cardShadow: 'rgba(0, 0, 0, 0.15)',

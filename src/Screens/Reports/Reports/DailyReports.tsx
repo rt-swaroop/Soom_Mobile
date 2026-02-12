@@ -124,7 +124,7 @@ const DailyReports = () => {
             <ScrollView
                 style={styles.container}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 120 }}
+                contentContainerStyle={styles.scrollContent}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
                 }
@@ -167,7 +167,7 @@ const DailyReports = () => {
                                                     <Text style={[styles.dropdownItemText, active && styles.activeDropdownItemText]}>
                                                         {idx === 0 ? "Today, " : ""}{date.format('MMM DD, YYYY')}
                                                     </Text>
-                                                    {active && <Icon name="check" size={18} color={COLORS.primary} style={{ marginLeft: 'auto' }} />}
+                                                    {active && <Icon name="check" size={18} color={COLORS.primary} style={styles.checkIcon} />}
                                                 </TouchableOpacity>
                                                 {idx < pastDates.length - 1 && <View style={styles.dropdownDivider} />}
                                             </React.Fragment>
@@ -180,7 +180,7 @@ const DailyReports = () => {
                                             setShowPicker(true);
                                         }}
                                     >
-                                        <Icon name="calendar-month" size={20} color={theme.textSecondary} style={{ marginRight: 10 }} />
+                                        <Icon name="calendar-month" size={20} color={theme.textSecondary} style={styles.calendarIcon} />
                                         <Text style={[styles.dropdownItemText, { color: theme.textSecondary }]}>Open Calendar</Text>
                                     </TouchableOpacity>
                                 </View>
@@ -206,7 +206,7 @@ const DailyReports = () => {
                     </View>
                 )}
 
-                <View style={{ marginTop: 4 }}>
+                <View style={styles.reportsListContainer}>
                     {loading && !refreshing ? (
                         [1, 2, 3].map((i) => <DailyReportSkeleton key={i} />)
                     ) : dailyReport && Array.isArray(dailyReport.tasks) && dailyReport.tasks.length > 0 ? (
@@ -217,17 +217,20 @@ const DailyReports = () => {
                         <View style={styles.emptyStateContainer}>
                             <TouchableOpacity
                                 style={styles.emptyStateIconWrapper}
-                                onPress={() => navigation.navigate(ROUTES.SUBMITDAILYREPORT)}
-                                activeOpacity={0.7}
+                                onPress={() => isToday && navigation.navigate(ROUTES.SUBMITDAILYREPORT)}
+                                activeOpacity={isToday ? 0.7 : 1}
+                                disabled={!isToday}
                             >
                                 <Icon
                                     name={isToday ? "plus" : "file-search-outline"}
                                     size={56}
-                                    color={COLORS.primary}
+                                    color={isToday ? COLORS.primary : theme.textSecondary + '40'}
                                 />
                             </TouchableOpacity>
                             <Text style={styles.emptyStateText}>
-                                {isToday ? "No reports submitted yet for today" : "No reports found for this date"}
+                                {isToday
+                                    ? "No reports submitted yet for today"
+                                    : "No reports found for this date. Submissions are only allowed for the current date."}
                             </Text>
                         </View>
                     )}
@@ -248,7 +251,7 @@ const DailyReports = () => {
 
                         return (
                             <View style={styles.submitButton}>
-                                <Icon name="clock-outline" size={20} color={COLORS.white} style={{ marginRight: 8 }} />
+                                <Icon name="clock-outline" size={20} color={COLORS.white} style={styles.clockIcon} />
                                 <Text style={styles.submitButtonText}>
                                     TOTAL TIME: {totalHours}h {remainingMinutes}m
                                 </Text>

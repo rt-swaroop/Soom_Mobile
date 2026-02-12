@@ -10,6 +10,8 @@ const API_ROUTES = {
     TIMEOFF: `${BASE_URL}/timeoff`,
     NOTIFICATIONS: `${BASE_URL}/notifications`,
     APP_VERSION: `${BASE_URL}/app-version`,
+    STATISTICS: `${BASE_URL}/statistics`,
+    USER: `${BASE_URL}/users`,
 };
 
 export default API_ROUTES;

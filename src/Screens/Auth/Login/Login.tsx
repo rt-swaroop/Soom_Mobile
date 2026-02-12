@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useDispatch } from 'react-redux';
 
 import DeviceInfo from "react-native-device-info";
@@ -17,7 +17,7 @@ import { ROLES } from "../../../utils/constants";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
 import { ROUTES } from "../../../navigation/routes";
 
-import { setUser } from '../../../redux/reducers/authReducer'
+import { setUser, setActiveRole } from '../../../redux/reducers/authReducer'
 
 import { loginUser } from '../../../services/authServices'
 
@@ -58,12 +58,7 @@ const LoginScreen = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
 
-    useEffect(() => {
-        loadSavedCredentials();
-        startEntranceAnimation();
-    }, []);
-
-    const startEntranceAnimation = () => {
+    const startEntranceAnimation = useCallback(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -76,9 +71,9 @@ const LoginScreen = () => {
                 useNativeDriver: true,
             })
         ]).start();
-    };
+    }, [fadeAnim, slideAnim]);
 
-    const loadSavedCredentials = async () => {
+    const loadSavedCredentials = useCallback(async () => {
         try {
             const credentials = await Keychain.getGenericPassword();
             if (credentials) {
@@ -88,7 +83,12 @@ const LoginScreen = () => {
         } catch (err) {
             console.log("Error loading saved credentials:", err);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadSavedCredentials();
+        startEntranceAnimation();
+    }, [loadSavedCredentials, startEntranceAnimation]);
 
     const handleLogin = async () => {
         if (!companyCode) {
@@ -125,9 +125,13 @@ const LoginScreen = () => {
                 await Keychain.resetGenericPassword();
             }
 
-            const targetRoute = response.data.user.role === ROLES.COMPANY_ADMIN
-                ? ROUTES.ROLE_SELECTION
-                : ROUTES.HOME;
+            let targetRoute: any = ROUTES.HOME;
+            if (response.data.user.role === ROLES.COMPANY_ADMIN) {
+                targetRoute = ROUTES.ROLE_SELECTION;
+            } else if (response.data.user.role === ROLES.GLOBAL_MANAGER) {
+                targetRoute = ROUTES.ADMIN_NAV;
+                dispatch(setActiveRole('admin'));
+            }
 
             setTimeout(() => {
                 navigation.dispatch(
@@ -150,7 +154,7 @@ const LoginScreen = () => {
 
     return (
         <LinearGradient colors={[theme.gradientStart, theme.gradientEnd]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.container}>
-            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.flex1}>
                 <View style={styles.topDecoration} />
                 <View style={styles.bottomDecoration} />
                 <View style={styles.midDecoration} />
@@ -165,7 +169,7 @@ const LoginScreen = () => {
                         <Image source={isDark ? IMAGES.appLogo : IMAGES.appLogoDark} style={styles.logo} resizeMode="contain" />
                     </Animated.View>
 
-                    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }], width: '100%' }}>
+                    <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }, styles.animatedView]}>
                         <LinearGradient colors={theme.glassCardGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.glassCard}>
                             <Text style={styles.title}>Welcome Back</Text>
                             <Text style={styles.subtitle}>Log in to your account</Text>

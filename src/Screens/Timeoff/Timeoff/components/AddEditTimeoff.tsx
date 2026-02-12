@@ -116,13 +116,13 @@ const AddEditTimeoff = (props: any) => {
 
             if (start && end) {
 
-                const startDate = new Date();
-                startDate.setHours(start.hour, start.minute, 0, 0);
+                const sDate = new Date();
+                sDate.setHours(start.hour, start.minute, 0, 0);
 
-                const endDate = new Date();
-                endDate.setHours(end.hour, end.minute, 0, 0);
+                const eDate = new Date();
+                eDate.setHours(end.hour, end.minute, 0, 0);
 
-                const diffMs = endDate.getTime() - startDate.getTime();
+                const diffMs = eDate.getTime() - sDate.getTime();
                 const diffHours = diffMs / (1000 * 60 * 60);
                 if (diffHours > 0) {
                     setNoOfHours(diffHours);
@@ -239,7 +239,7 @@ const AddEditTimeoff = (props: any) => {
 
                     {(selectedOption === 'Work From Home') && (
                         <>
-                            <View style={{ marginBottom: 16 }}>
+                            <View style={styles.formField}>
                                 <TouchableOpacity
                                     onPress={() => setShowDatePicker(true)}
                                     activeOpacity={0.7}
@@ -257,35 +257,28 @@ const AddEditTimeoff = (props: any) => {
                                 </TouchableOpacity>
                             </View>
 
-                            {noOfDays > 0 && (
-                                <View style={{ marginBottom: 16 }}>
-                                    <Text style={styles.infoLabel}>Total Days</Text>
-                                    <View style={{
-                                        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                                        borderRadius: 12,
-                                        padding: 12,
-                                        marginTop: 6,
-                                    }}>
-                                        <Text style={styles.infoValue}>
-                                            {noOfDays} Day{noOfDays > 1 ? 's' : ''}
-                                        </Text>
-                                    </View>
+                            <View style={styles.formField}>
+                                <Text style={styles.infoLabel}>Total Days</Text>
+                                <View style={styles.totalInfoContainer}>
+                                    <Text style={styles.infoValue}>
+                                        {noOfDays} Day{noOfDays > 1 ? 's' : ''}
+                                    </Text>
                                 </View>
-                            )}
+                            </View>
                         </>
                     )}
 
                     {selectedOption === 'Half Day' && (
                         <>
-                            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-                                <View style={{ flex: 1, marginRight: 8 }}>
+                            <View style={styles.timeInputRow}>
+                                <View style={[styles.timeInputContainer, styles.marginRight8]}>
                                     <TimePickerInput
                                         label="Start Time"
                                         time={startTime}
                                         setTime={setStartTime}
                                     />
                                 </View>
-                                <View style={{ flex: 1 }}>
+                                <View style={styles.timeInputContainer}>
                                     <TimePickerInput
                                         label="End Time"
                                         time={endTime}
@@ -295,14 +288,9 @@ const AddEditTimeoff = (props: any) => {
                             </View>
 
                             {noOfHours > 0 && (
-                                <View style={{ marginBottom: 16 }}>
+                                <View style={styles.formField}>
                                     <Text style={styles.infoLabel}>Total Hours</Text>
-                                    <View style={{
-                                        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-                                        borderRadius: 12,
-                                        padding: 12,
-                                        marginTop: 6,
-                                    }}>
+                                    <View style={styles.totalInfoContainer}>
                                         <Text style={styles.infoValue}>
                                             {noOfHours.toFixed(1)} Hour{noOfHours > 1 ? 's' : ''}
                                         </Text>
@@ -312,19 +300,10 @@ const AddEditTimeoff = (props: any) => {
                         </>
                     )}
 
-                    <View style={{ marginBottom: 16 }}>
-                        <Text style={styles.infoLabel}>Contact Number <Text style={{ color: '#EF4444' }}>*</Text></Text>
+                    <View style={styles.formField}>
+                        <Text style={styles.infoLabel}>Contact Number <Text style={styles.requiredAsterisk}>*</Text></Text>
                         <TextInput
-                            style={{
-                                backgroundColor: theme.cardBg,
-                                borderWidth: 1,
-                                borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-                                borderRadius: 12,
-                                padding: 12,
-                                marginTop: 6,
-                                color: theme.text,
-                                fontSize: 14,
-                            }}
+                            style={styles.input}
                             placeholder="Enter contact number"
                             placeholderTextColor={theme.textSecondary}
                             keyboardType="phone-pad"
@@ -334,21 +313,10 @@ const AddEditTimeoff = (props: any) => {
                         />
                     </View>
 
-                    <View style={{ marginBottom: 8 }}>
-                        <Text style={styles.infoLabel}>Reason <Text style={{ color: '#EF4444' }}>*</Text></Text>
+                    <View style={styles.marginBottom8}>
+                        <Text style={styles.infoLabel}>Reason <Text style={styles.requiredAsterisk}>*</Text></Text>
                         <TextInput
-                            style={{
-                                backgroundColor: theme.cardBg,
-                                borderWidth: 1,
-                                borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
-                                borderRadius: 12,
-                                padding: 12,
-                                marginTop: 6,
-                                color: theme.text,
-                                fontSize: 14,
-                                height: 100,
-                                textAlignVertical: 'top'
-                            }}
+                            style={[styles.input, styles.textArea]}
                             placeholder="Enter reason"
                             placeholderTextColor={theme.textSecondary}
                             value={reason}
@@ -360,7 +328,7 @@ const AddEditTimeoff = (props: any) => {
 
                 {!isNonEdit && (
                     <TouchableOpacity
-                        style={[styles.applyBtn, loading && { opacity: 0.7 }]}
+                        style={[styles.applyBtn, loading && styles.disabledBtn]}
                         onPress={handleSubmit}
                         activeOpacity={0.85}
                         disabled={loading}

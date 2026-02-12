@@ -12,6 +12,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         paddingHorizontal: 16,
         backgroundColor: theme.background,
     },
+    scrollContent: {
+        paddingBottom: 120,
+    },
     screenHeader: {
         height: 110,
         position: 'absolute',
@@ -132,6 +135,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
         marginVertical: 12,
     },
+    checkIcon: {
+        marginLeft: 'auto',
+    },
     taskContainer: {
         marginBottom: 4,
     },
@@ -165,6 +171,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         right: 0,
         alignItems: 'center',
         paddingHorizontal: 20,
+    },
+    clockIcon: {
+        marginRight: 8,
     },
     submitButton: {
         backgroundColor: COLORS.primary,
@@ -213,6 +222,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         color: theme.textSecondary,
         fontSize: 16,
         fontWeight: '600',
+    },
+    reportsListContainer: {
+        marginTop: 4,
     },
     editButtonContainer: {
         flexDirection: 'row',
@@ -342,6 +354,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         height: 1,
         backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
         marginVertical: 4,
+    },
+    calendarIcon: {
+        marginRight: 10,
     },
     calendarOption: {
         marginTop: 4,

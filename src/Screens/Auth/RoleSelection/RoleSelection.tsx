@@ -13,7 +13,7 @@ import { COLORS } from "../../../theme/colors";
 import { ROUTES } from "../../../navigation/routes";
 import { RootStackParamList } from "../../../navigation/AppNavigator";
 
-import { logoutUser } from "../../../redux/reducers/authReducer";
+import { logoutUser, setActiveRole } from "../../../redux/reducers/authReducer";
 import { useAppTheme } from "../../../theme/useAppTheme";
 
 const RoleSelectionScreen = () => {
@@ -41,14 +41,14 @@ const RoleSelectionScreen = () => {
     }, []);
 
     const handleRoleSelect = (roleType: 'admin' | 'user') => {
+        dispatch(setActiveRole(roleType));
         if (roleType === 'admin') {
-            showMessage({
-                message: "Coming Soon",
-                description: "The Company Admin module is currently under development.",
-                type: "info",
-                icon: "info",
-                backgroundColor: COLORS.primary,
-            });
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: ROUTES.ADMIN_NAV }],
+                })
+            );
             return;
         }
 

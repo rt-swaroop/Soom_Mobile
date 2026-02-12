@@ -4,6 +4,13 @@ export const ROUTES = {
     UPDATE_REQUIRED: 'UpdateRequired',
     LOGIN: 'Login',
     ROLE_SELECTION: 'RoleSelection',
+    ADMIN_DASHBOARD: 'AdminDashboard',
+    ADMIN_ATTENDANCE: 'AdminAttendance',
+    ADMIN_LEAVES: 'AdminLeaves',
+    ADMIN_USERS: 'AdminUsers',
+    ADMIN_SHIFTS: 'AdminShifts',
+    ADMIN_DAILY_REPORTS: 'AdminDailyReports',
+    ADMIN_NAV: 'AdminNav',
 
     HOME: 'Home',
 

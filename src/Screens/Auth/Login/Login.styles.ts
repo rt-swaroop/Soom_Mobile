@@ -5,6 +5,12 @@ export const createStyles = (theme: any) => StyleSheet.create({
     container: {
         flex: 1,
     },
+    flex1: {
+        flex: 1,
+    },
+    animatedView: {
+        width: '100%',
+    },
     logoContainer: {
         alignItems: "center",
         marginBottom: 30,

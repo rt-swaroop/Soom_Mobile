@@ -10,7 +10,7 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
     },
     scrollContent: {
         paddingTop: 130,
-        paddingBottom: 40,
+        paddingBottom: 150,
     },
     screenHeader: {
         height: 110,
@@ -62,6 +62,9 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 5,
+    },
+    disabledBtn: {
+        opacity: 0.7,
     },
     applyText: {
         color: COLORS.white,
@@ -152,6 +155,45 @@ export const createStyles = (theme: Theme) => StyleSheet.create({
         fontWeight: '600',
         color: theme.text,
         fontSize: 13,
+    },
+    formField: {
+        marginBottom: 16,
+    },
+    totalInfoContainer: {
+        backgroundColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 6,
+    },
+    timeInputRow: {
+        flexDirection: 'row',
+        marginBottom: 16,
+    },
+    timeInputContainer: {
+        flex: 1,
+    },
+    marginRight8: {
+        marginRight: 8,
+    },
+    input: {
+        backgroundColor: theme.cardBg,
+        borderWidth: 1,
+        borderColor: theme.text === '#FFFFFF' ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+        borderRadius: 12,
+        padding: 12,
+        marginTop: 6,
+        color: theme.text,
+        fontSize: 14,
+    },
+    textArea: {
+        height: 100,
+        textAlignVertical: 'top',
+    },
+    marginBottom8: {
+        marginBottom: 8,
+    },
+    requiredAsterisk: {
+        color: '#EF4444',
     },
     statusRow: {
         flexDirection: 'row',

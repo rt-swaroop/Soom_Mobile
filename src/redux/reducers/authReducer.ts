@@ -4,6 +4,7 @@ const initialState = {
     user: null,
     accessToken: null,
     refreshToken: null,
+    activeRole: null,
 };
 
 const authSlice = createSlice({
@@ -18,14 +19,18 @@ const authSlice = createSlice({
         updateAccessToken(state, action) {
             state.accessToken = action.payload;
         },
+        setActiveRole(state, action) {
+            state.activeRole = action.payload;
+        },
         logoutUser(state) {
             state.user = null;
             state.accessToken = null;
             state.refreshToken = null;
+            state.activeRole = null;
         }
     },
 });
 
-export const { setUser, updateAccessToken, logoutUser } = authSlice.actions;
+export const { setUser, updateAccessToken, logoutUser, setActiveRole } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -1,49 +1,31 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 import { View, Text, Animated, Platform, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useNavigation, NavigationProp, getFocusedRouteNameFromRoute, useNavigationState } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LinearGradient from "react-native-linear-gradient";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation, useNavigationState } from "@react-navigation/native";
 
 import { COLORS } from "../theme/colors";
 import { useAppTheme } from "../theme/useAppTheme";
+import { ROUTES } from "./routes";
 
-import HomeScreen from "../screens/Dashboard/Home/Home"
-import AttendanceScreen from "../screens/Attendance/Attendance/Attendance";
-import MoreOptionsModal from "./components/MoreOptionsModal";
+import AdminDashboard from "../screens/Admin/Dashboard/AdminDashboard";
+import AdminAttendance from "../screens/Admin/Attendance/AdminAttendance";
+import AdminLeaves from "../screens/Admin/Leaves/AdminLeaves";
+import AdminEmployees from "../screens/Admin/Employees/AdminEmployees";
+import AdminShifts from "../screens/Admin/Shifts/AdminShifts";
+import AdminDailyReports from "../screens/Admin/Reports/AdminDailyReports";
+import AdminMoreOptionsModal from "./components/AdminMoreOptionsModal";
 
 import HeaderNotification from "../components/Header/HeaderNotification";
 import HeaderProfile from "../components/Header/HeaderProfile";
 
-import LeavesStackNavigator from "./components/LeavesStackNavigator";
-import TimeoffStackNavigator from "./components/TimeoffStackNavigator";
-import ReportsStackNavigator from "./components/ReportsStackNavigator";
-import ShiftsStackNavigator from "./components/ShiftsStackNavigator";
-import ProfileStackNavigator from "./components/ProfileStackNavigator";
-
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
-
-const HeaderBackground = () => {
-    const { isDark } = useAppTheme();
-    return (
-        <View style={[styles.headerBackground, isDark ? styles.darkBG : styles.primaryBG]}>
-            {!isDark && <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.flex1} />}
-        </View>
-    );
-};
 
 const HeaderLeft = () => <HeaderNotification />;
 const HeaderRight = () => <HeaderProfile />;
-
-const HomeIcon = (props: any) => <TabIcon {...props} name="home" routeName="Home" />;
-const AttendanceIcon = (props: any) => <TabIcon {...props} name="access-time" routeName="Attendance" />;
-const ReportsIcon = (props: any) => <TabIcon {...props} name="description" routeName="Reports" />;
-const LeavesIcon = (props: any) => <TabIcon {...props} name="calendar-today" routeName="Leaves" />;
-const MoreIcon = (props: any) => <TabIcon {...props} name="apps" routeName="More" />;
 
 const TabIcon = ({ name, color, focused, routeName }: { name: string; color: string; focused: boolean, routeName: string }) => {
     const scale = useRef(new Animated.Value(focused ? 1.15 : 1)).current;
@@ -52,8 +34,8 @@ const TabIcon = ({ name, color, focused, routeName }: { name: string; color: str
     const index = useNavigationState(state => state.index);
     const activeRouteName = routes?.[index]?.name;
 
-    const isMoreTab = routeName === "More";
-    const isRedirectActive = activeRouteName === "TimeoffStack" || activeRouteName === "ShiftsStack";
+    const isMoreTab = routeName === "AdminMore";
+    const isRedirectActive = activeRouteName === ROUTES.ADMIN_SHIFTS || activeRouteName === ROUTES.ADMIN_USERS;
     const isEffectiveFocused = focused || (isMoreTab && isRedirectActive);
     const effectiveColor = isEffectiveFocused ? COLORS.white : color;
 
@@ -90,33 +72,56 @@ const TabIcon = ({ name, color, focused, routeName }: { name: string; color: str
     );
 };
 
-const HeaderTitle = () => (
+const AdminHeaderBackground = () => {
+    const { isDark } = useAppTheme();
+    return (
+        <View style={[styles.headerBackground, isDark ? styles.darkBG : styles.primaryBG]}>
+            {!isDark && <LinearGradient colors={[COLORS.primary, COLORS.primaryDark]} style={styles.flex1} />}
+        </View>
+    );
+};
+
+const AdminDashboardHeaderTitle = () => (
     <Text style={styles.headerTitle}>Soom</Text>
 );
 
-const BottomTabNavigator = () => {
+const AdminTabBarIcon = ({ routeName, color, focused }: { routeName: string; color: string; focused: boolean }) => {
+    let iconName: string = "home";
+    if (routeName === ROUTES.ADMIN_DASHBOARD) iconName = "home";
+    else if (routeName === ROUTES.ADMIN_ATTENDANCE) iconName = "access-time";
+    else if (routeName === ROUTES.ADMIN_LEAVES) iconName = "calendar-today";
+    else if (routeName === ROUTES.ADMIN_DAILY_REPORTS) iconName = "description";
+    else if (routeName === "AdminMore") iconName = "apps";
+
+    return <TabIcon name={iconName} color={color} focused={focused} routeName={routeName} />;
+};
+
+const DashboardIcon = (props: any) => <AdminTabBarIcon {...props} routeName={ROUTES.ADMIN_DASHBOARD} />;
+const AttendanceIcon = (props: any) => <AdminTabBarIcon {...props} routeName={ROUTES.ADMIN_ATTENDANCE} />;
+const LeavesIcon = (props: any) => <AdminTabBarIcon {...props} routeName={ROUTES.ADMIN_LEAVES} />;
+const DailyReportsIcon = (props: any) => <AdminTabBarIcon {...props} routeName={ROUTES.ADMIN_DAILY_REPORTS} />;
+const MoreIcon = (props: any) => <AdminTabBarIcon {...props} routeName="AdminMore" />;
+
+const AdminBottomTabNavigator = () => {
     const insets = useSafeAreaInsets();
-    const [isModalVisible, setModalVisible] = useState(false);
-
-    const navigation = useNavigation<NavigationProp<any>>();
     const { isDark } = useAppTheme();
+    const [isMoreModalVisible, setMoreModalVisible] = useState(false);
 
-    const toggleModal = () => setModalVisible(!isModalVisible);
+    const navigation = useNavigation<any>();
+    const toggleMoreModal = () => setMoreModalVisible(!isMoreModalVisible);
 
-    const handleSelect = (option: string) => {
+    const handleSelectMore = (option: string) => {
         switch (option) {
-            case "Time-Off":
-                // @ts-ignore
-                navigation.navigate("BottomTabs", { screen: "TimeoffStack" });
-                break;
             case "Shifts":
-                // @ts-ignore
-                navigation.navigate("BottomTabs", { screen: "ShiftsStack" });
+                navigation.navigate("AdminTabs", { screen: ROUTES.ADMIN_SHIFTS });
+                break;
+            case "Users":
+                navigation.navigate("AdminTabs", { screen: ROUTES.ADMIN_USERS });
                 break;
             default:
-                console.log("Selected:", option);
+                console.log("Admin Selected More:", option);
         }
-        toggleModal();
+        toggleMoreModal();
     };
 
     return (
@@ -130,7 +135,7 @@ const BottomTabNavigator = () => {
                         elevation: 0,
                         shadowOpacity: 0,
                     },
-                    headerBackground: HeaderBackground,
+                    headerBackground: AdminHeaderBackground,
                     headerTintColor: COLORS.white,
                     tabBarActiveTintColor: COLORS.white,
                     tabBarInactiveTintColor: isDark ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.5)",
@@ -150,112 +155,87 @@ const BottomTabNavigator = () => {
                     headerTitleAlign: 'center',
                 })}
             >
-                <Tab.Screen name="Home" component={HomeScreen}
+                <Tab.Screen
+                    name={ROUTES.ADMIN_DASHBOARD}
+                    component={AdminDashboard}
                     options={{
-                        headerTitle: HeaderTitle,
-                        tabBarIcon: HomeIcon,
+                        headerTitle: AdminDashboardHeaderTitle,
+                        tabBarIcon: DashboardIcon,
                     }}
                 />
-
-                <Tab.Screen name="Attendance" component={AttendanceScreen}
+                <Tab.Screen
+                    name={ROUTES.ADMIN_ATTENDANCE}
+                    component={AdminAttendance}
                     options={{
-                        headerTitle: "Attendance",
+                        headerTitle: "Team Attendance",
                         headerTitleStyle: { fontWeight: '700', fontSize: 18 },
                         tabBarIcon: AttendanceIcon,
                     }}
                 />
-
-                <Tab.Screen name="Reports" component={ReportsStackNavigator}
-                    options={({ route }) => {
-                        const routeName = getFocusedRouteNameFromRoute(route) ?? "";
-                        const hiddenRoutes = ["SubmitDailyReport"];
-                        return {
-                            headerShown: !hiddenRoutes.includes(routeName),
-                            headerTitle: "Daily Reports",
-                            headerTitleStyle: { fontWeight: '700', fontSize: 18 },
-                            tabBarIcon: ReportsIcon,
-                        };
-                    }}
-                />
-
-                <Tab.Screen name="Leaves" component={LeavesStackNavigator}
-                    options={({ route }) => {
-                        const routeName = getFocusedRouteNameFromRoute(route) ?? "";
-                        const hiddenRoutes = ["AddEditLeaves", "LeaveHistory"];
-                        return {
-                            headerShown: !hiddenRoutes.includes(routeName),
-                            headerTitle: "Leaves",
-                            headerTitleStyle: { fontWeight: '700', fontSize: 18 },
-                            tabBarIcon: LeavesIcon,
-                        };
-                    }}
-                />
-
-                <Tab.Screen name="More" component={View}
+                <Tab.Screen
+                    name={ROUTES.ADMIN_LEAVES}
+                    component={AdminLeaves}
                     options={{
+                        headerTitle: "Approvals",
+                        headerTitleStyle: { fontWeight: '700', fontSize: 18 },
+                        tabBarIcon: LeavesIcon,
+                    }}
+                />
+                <Tab.Screen
+                    name={ROUTES.ADMIN_DAILY_REPORTS}
+                    component={AdminDailyReports}
+                    options={{
+                        headerTitle: "Team Daily Reports",
+                        headerTitleStyle: { fontWeight: '700', fontSize: 18 },
+                        tabBarIcon: DailyReportsIcon,
+                    }}
+                />
+                <Tab.Screen
+                    name="AdminMore"
+                    component={View}
+                    options={{
+                        headerShown: false,
                         tabBarIcon: MoreIcon,
                     }}
                     listeners={{
                         tabPress: (e) => {
                             e.preventDefault();
-                            toggleModal();
+                            toggleMoreModal();
                         },
                     }}
                 />
-
-                <Tab.Screen name="TimeoffStack" component={TimeoffStackNavigator}
-                    options={({ route }) => {
-                        const routeName = getFocusedRouteNameFromRoute(route) ?? "";
-                        const hiddenRoutes = ["AddEditTimeoff", "TimeoffHistory"];
-                        return {
-                            headerShown: !hiddenRoutes.includes(routeName),
-                            headerTitle: "Time Off",
-                            headerTitleStyle: { fontWeight: '700', fontSize: 18 },
-                            tabBarButton: () => null,
-                            tabBarItemStyle: { display: 'none' }
-                        };
+                <Tab.Screen
+                    name={ROUTES.ADMIN_SHIFTS}
+                    component={AdminShifts}
+                    options={{
+                        headerTitle: "Team Shifts",
+                        headerTitleStyle: { fontWeight: '700', fontSize: 18 },
+                        tabBarButton: () => null,
+                        tabBarItemStyle: { display: 'none' }
                     }}
                 />
-
-                <Tab.Screen name="ShiftsStack" component={ShiftsStackNavigator}
+                <Tab.Screen
+                    name={ROUTES.ADMIN_USERS}
+                    component={AdminEmployees}
                     options={{
-                        headerShown: true,
-                        headerTitle: "Shifts",
+                        headerTitle: "Users",
                         headerTitleStyle: { fontWeight: '700', fontSize: 18 },
                         tabBarButton: () => null,
                         tabBarItemStyle: { display: 'none' }
                     }}
                 />
             </Tab.Navigator>
-
-            <MoreOptionsModal
-                visible={isModalVisible}
-                onClose={toggleModal}
-                onSelect={handleSelect}
+            <AdminMoreOptionsModal
+                visible={isMoreModalVisible}
+                onClose={toggleMoreModal}
+                onSelect={handleSelectMore}
             />
         </View>
     );
 };
 
-const MainNavigator = () => {
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="BottomTabs" component={BottomTabNavigator} />
-
-            <Stack.Screen name="ProfileStack" component={ProfileStackNavigator} />
-
-        </Stack.Navigator>
-    );
-};
-
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-    },
-    flex1: {
-        flex: 1,
-    },
-    headerBackground: {
         flex: 1,
     },
     tabIconContainer: {
@@ -270,13 +250,6 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: 'rgba(255,255,255,0.12)',
     },
-    headerTitle: {
-        color: COLORS.white,
-        fontSize: 36,
-        fontWeight: '700',
-        fontFamily: Platform.OS === 'ios' ? 'Bradley Hand' : 'cursive',
-        marginTop: Platform.OS === 'ios' ? 0 : 0,
-    },
     tabBar: {
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
@@ -288,6 +261,10 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 10,
         paddingTop: 0,
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
     },
     tabBarItem: {
         justifyContent: 'center',
@@ -303,6 +280,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    headerTitle: {
+        color: COLORS.white,
+        fontSize: 36,
+        fontWeight: '700',
+        fontFamily: Platform.OS === 'ios' ? 'Bradley Hand' : 'cursive',
+        marginTop: Platform.OS === 'ios' ? 0 : 0,
+    },
+    flex1: {
+        flex: 1,
+    },
+    headerBackground: {
+        flex: 1,
+    },
     primaryBG: {
         backgroundColor: COLORS.primary,
     },
@@ -317,4 +307,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MainNavigator;
+export default AdminBottomTabNavigator;

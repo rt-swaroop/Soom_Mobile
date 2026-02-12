@@ -16,7 +16,7 @@ export const createStyles = (theme: any) => StyleSheet.create({
         borderRadius: 24,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: theme.glassCardBorder,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.3,
@@ -110,7 +110,7 @@ export const createStyles = (theme: any) => StyleSheet.create({
         flexDirection: 'row',
         padding: 15,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.05)',
+        borderTopColor: theme.glassCardBorder,
         justifyContent: 'flex-end',
     },
     footerBtn: {

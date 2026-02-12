@@ -10,7 +10,7 @@ import { check, request, PERMISSIONS, RESULTS } from "react-native-permissions";
 import { jwtDecode } from "jwt-decode";
 import { ROUTES } from "./routes";
 import { logoutUser, setUser } from "../redux/reducers/authReducer";
-import { selectAccessToken, selectRefeshToken, selectUser } from "../redux/selector";
+import { selectAccessToken, selectActiveRole, selectRefeshToken, selectUser } from "../redux/selector";
 
 import { refreshToken as refreshApi, checkAppVersion } from "../services/authServices";
 
@@ -25,6 +25,7 @@ import LauncherScreen from "../screens/Auth/Launcher/Launcher";
 import UpdateRequiredScreen from "../screens/Auth/UpdateRequired/UpdateRequiredScreen";
 
 import MainNavigator from "./BottomTabNavigator";
+import AdminNavigator from "./AdminNavigator";
 
 import { ROLES } from "../utils/constants";
 
@@ -38,6 +39,7 @@ export type RootStackParamList = {
     [ROUTES.NOTIFICATIONS]: undefined;
     [ROUTES.NOTIFICATION_PREFERENCES]: undefined;
     [ROUTES.PERMISSION_MANAGER]: undefined;
+    [ROUTES.ADMIN_NAV]: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -47,6 +49,7 @@ const AppNavigator = () => {
     const user = useSelector(selectUser);
     const accessToken = useSelector(selectAccessToken);
     const refreshToken = useSelector(selectRefeshToken);
+    const activeRole = useSelector(selectActiveRole);
 
     const [loading, setLoading] = useState(true);
     const [updateRequired, setUpdateRequired] = useState<{ required: boolean; url: string; message: string }>({
@@ -138,7 +141,13 @@ const AppNavigator = () => {
         if (updateRequired.required) return ROUTES.UPDATE_REQUIRED;
         if (!user || !accessToken) return ROUTES.GET_STARTED;
 
+        if (user.role === ROLES.GLOBAL_MANAGER) {
+            return ROUTES.ADMIN_NAV;
+        }
+
         if (user.role === ROLES.COMPANY_ADMIN) {
+            if (activeRole === 'admin') return ROUTES.ADMIN_NAV;
+            if (activeRole === 'user') return ROUTES.HOME;
             return ROUTES.ROLE_SELECTION;
         }
 
@@ -157,6 +166,7 @@ const AppNavigator = () => {
                 <Stack.Screen name={ROUTES.LOGIN} component={LoginScreen} />
                 <Stack.Screen name={ROUTES.ROLE_SELECTION} component={RoleSelectionScreen} />
                 <Stack.Screen name={ROUTES.HOME} component={MainNavigator} />
+                <Stack.Screen name={ROUTES.ADMIN_NAV} component={AdminNavigator} />
                 <Stack.Screen name={ROUTES.NOTIFICATIONS} component={NotificationsScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={ROUTES.NOTIFICATION_PREFERENCES} component={NotificationPreferencesScreen} options={{ headerShown: false }} />
                 <Stack.Screen name={ROUTES.PERMISSION_MANAGER} component={PermissionManagerScreen} options={{ headerShown: false }} />
